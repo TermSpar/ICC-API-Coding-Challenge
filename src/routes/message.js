@@ -7,8 +7,8 @@ const Token = require('../models/tokenModel')
 // Getting all
 router.get('/', async (req, res) => {
     try {
-        const subscribers = await Message.find()
-        res.json(subscribers)
+        const messages = await Message.find()
+        res.json(messages)
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
