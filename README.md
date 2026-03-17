@@ -42,5 +42,12 @@ Install dependencies:
 npm install
 ```
 # Documentation
-Full documentation is available on Github Pages:
+Full documentation is available on **Github Pages**:
+
 https://termspar.github.io/ICC-API-Coding-Challenge/
+
+It can also be viewed locally by opening
+```
+docs/index.html
+```
+in your browser
