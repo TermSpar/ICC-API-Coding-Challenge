@@ -37,6 +37,7 @@ router.get('/:token', async (req, res) => {
     // validate the token (this handles the errors)
     const validToken = await validateToken(providedToken)
     if (!validToken.success){
+        // status code 400 to indicate a user error
         return res.status(400).json(validToken)
     }
 
@@ -46,6 +47,7 @@ router.get('/:token', async (req, res) => {
     try {
         message = await Message.findOne({ token: validToken.token.token })
     } catch (err) {
+        // status code 500 to indicate a server side error
         res.status(500).json({ 
             success: false,
             error: err.message,
@@ -55,7 +57,8 @@ router.get('/:token', async (req, res) => {
         })
     }
 
-    res.status(201).json({
+    // status code 200 to indicate a successful retrieval
+    res.status(200).json({
         success: true,
         error: null,
         name: message.name,
@@ -91,6 +94,7 @@ router.post('/', async (req, res) => {
     try {
         token = await createToken()
     } catch (err) {
+        // status code 500 to indicate a server side error
         return res.status(500).json({ 
             success: false,
             error: err.message,
