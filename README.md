@@ -41,6 +41,26 @@ Install dependencies:
 ```
 npm install
 ```
+# Running the API
+**Start the server**:
+```
+npm start
+```
+Alternatively for nodemon:
+```
+npm run devStart
+```
+The API will start on:
+```
+http://localhost:3000
+```
+**The API requires a running MongoDB instance**. Follow the instructions for starting MongoDB on your operating system.  
+  
+Once both the server and the database are running, the following output will be given:
+```
+Server started on port 3000
+Connected to Database
+```
 # Documentation
 Full documentation is available on **Github Pages**:
 
