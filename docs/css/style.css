@@ -6,6 +6,7 @@ body {
     display: flex;
     background-color: #f0f2f5;
     color: #2c3e50;
+    overflow-x: hidden; /* prevents horizontal scroll */
 }
 
 /* Sidebar Styling */
@@ -16,6 +17,8 @@ body {
     padding: 20px;
     box-sizing: border-box;
     position: fixed;
+    left: 0;
+    top: 0;
 }
 
 .sidebar h2 {
@@ -46,10 +49,12 @@ body {
 
 /* Main Content Styling */
 .main {
-    margin-left: 240px;
+    margin-left: 260px; /* sidebar width + spacing */
     padding: 30px;
+    box-sizing: border-box;
     flex: 1;
     max-width: 900px;
+    width: calc(100% - 260px); /* prevents overflow */
 }
 
 /* Sections */
@@ -80,12 +85,15 @@ body {
 }
 
 /* Paragraphs & Lists */
-.main p, .main ol, .main ul {
+.main p,
+.main ol,
+.main ul {
     line-height: 1.7;
     margin-bottom: 15px;
 }
 
-.main ol li, .main ul li {
+.main ol li,
+.main ul li {
     margin-bottom: 10px;
 }
 
@@ -94,7 +102,8 @@ pre {
     background-color: #ecf0f1;
     padding: 15px;
     border-radius: 6px;
-    overflow-x: auto;
+    overflow-x: auto; /* scroll inside code blocks */
+    max-width: 100%;
     margin-bottom: 20px;
     font-family: 'Courier New', monospace;
     font-size: 0.95em;
@@ -104,26 +113,34 @@ code {
     background-color: #ecf0f1;
     font-family: 'Courier New', monospace;
     font-size: 0.95em;
+    padding: 2px 4px;
+    border-radius: 4px;
 }
 
+/* Links */
 a {
-    color: #3c6897;  
+    color: #3c6897;
     text-decoration: none;
 }
+
 a:hover {
     color: #007bff;
-    text-decoration: underline; 
+    text-decoration: underline;
 }
 
+/* Tables */
 table {
     border-collapse: collapse;
     width: 100%;
+    max-width: 100%; /* prevents overflow */
+    table-layout: auto;
 }
 
 th, td {
-    border: 1px solid #ccc;   /* visible dividers */
+    border: 1px solid #ccc;
     padding: 8px 12px;
     text-align: left;
+    word-wrap: break-word;
 }
 
 th {
