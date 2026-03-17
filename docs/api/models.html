@@ -37,7 +37,7 @@
 
         <tr>
             <td>Message</td>
-            <td>A specified message with a name, email, and token attached.</td>
+            <td>A specified message (250 character limit) with a name, email, and token attached.</td>
         </tr>
 
         <tr>
@@ -139,6 +139,7 @@ const messageSchema = new mongoose.Schema({
     message: {
         type: String,
         required: true,
+        maxlength: 250
     },
     token: {
         type: String,

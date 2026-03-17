@@ -57,6 +57,7 @@ const messageSchema = new mongoose.Schema({
     message: {
         type: String,
         required: true,
+        maxlength: 250
     },
     /**
      * Token attached to the message.
