@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Message API Documentation</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2>Documentation</h2>
+        <a href="../index.html">Overview</a>
+        <a href="message.html" class="active">Message API</a>
+        <a href="token.html">Token Helpers</a>
+        <a href="../guides/setup.html">Setup & Running</a>
+    </div>
+
+    <div class="main">
+        <h1>Message API</h1>
+
+        <section class="section">
+            <p>
+                This API allows the user to generate a random token that
+                has a name, email, and message attached to it. This token
+                can then be used to retrieve the original name, email, and
+                message.
+            </p>
+        </section>
+
+        <h2>Endpoints</h2>
+
+        <section class="section">
+            <h3>GET /message/:token</h3>
+
+            <div class="endpoint">
+                <p>Retrieves a message using a one-time token.</p>
+
+                <pre><code>const providedToken = req.params.token</code></pre>
+
+                <p>
+                    Extracts the token the user provided in the URL.
+                </p>
+
+                <pre><code>
+const validToken = await validateToken(providedToken)
+if (!validToken.success){
+    res.status(400).json(validToken)
+}
+</code></pre>
+
+                <p>
+                    Calls the (async) <code>validateToken()</code>
+                    function from
+                    <a href="token-helper.html">tokenHelpers.js</a>,
+                    which will make the token accessible as
+                    <code>validToken.token</code>
+                    if it exists. If the token does not exist,
+                    <code>validToken.success</code> will return false
+                    along with an appropriate error message.
+                </p>
+
+                <p>
+                    The status will be a 400 error to inform the user
+                    that the issue is on their end. All of this
+                    information will come back in a json format.
+                </p>
+
+                <pre><code>
+try {
+    message = await Message.findOne({ token: validToken.token.token })
+} catch (err) {
+    return res.status(500).json({ 
+        success: false,
+        error: err.message,
+        name: null,
+        email: null,
+        message: null 
+    })
+}
+</code></pre>
+
+                <p>
+                    Since <code>findOne()</code> is an async function
+                    that could hypothetically fail, it is wrapped in a
+                    try-catch statement. Any <code>error</code> will
+                    be returned to the user, along with a false
+                    <code>success</code> flag, and null values for
+                    <code>name</code>, <code>email</code>, and
+                    <code>message</code>.
+                </p>
+
+                <p>
+                    Note: we must <code>return</code> this error
+                    otherwise the program would continue with a null
+                    <code>message</code>.
+                </p>
+
+                <pre><code>
+res.status(201).json({
+    success: true,
+    error: null,
+    name: message.name,
+    email: message.email,
+    message: message.message
+})
+</code></pre>
+
+                <p>
+                    If the token and its message have both been found,
+                    then the <code>Message</code> model object can be
+                    retrieved. This <code>message</code> will have its
+                    name, email, and message returned along with a
+                    true success flag and a false error flag.
+                </p>
+
+                <h3>Example Input</h3>
+
+                <pre><code>GET http://localhost:3000/message/eae18dc7e99990845817023567d7cdf03e50fbabb28c5c1432f50cbaf84feedf</code></pre>
+
+                <h3>Example Output</h3>
+
+                <pre><code>{
+    "success": true,
+    "error": null,
+    "name": "Ben",
+    "email": "Ben@test.com",
+    "message": "This is Ben's link... hi!"
+}</code></pre>
+            </div>
+        </section>
+
+        <section class="section">
+            <h3>POST /message/</h3>
+
+            <p>
+                Creates a <code>Message</code> with a
+                <code>name</code>, <code>email</code>, and
+                <code>message</code> content. A one-time
+                <code>Token</code> is also created and attached for
+                secure retrieval.
+            </p>
+
+            <pre><code>let token 
+try {
+    token = await createToken()
+} catch (err) {
+    return res.status(400).json({ 
+        success: false,
+        error: err.message,
+        token: null
+    })
+}</code></pre>
+
+            <p>
+                Calls the (async) <code>createToken()</code> function
+                from <a href="token-helper.html">tokenHelpers.js</a>,
+                which generates a one-time token with a 24-hour
+                expiration period. This token is put in the MongoDB.
+            </p>
+
+            <p>
+                Wrapped in a try-catch statement. If
+                <code>createToken()</code> fails, its error will be
+                caught and returned with a status 500 error.
+            </p>
+
+            <pre><code>const message = new Message({
+    name: req.body.name,
+    email: req.body.email,
+    message: req.body.message,
+    token
+})</code></pre>
+
+            <p>
+                A new <code>Message</code> Mongoose document is created
+                with the name, email, and message provided by the
+                user. The newly generated <code>token</code> is also
+                attached.
+            </p>
+
+            <pre><code>try {
+    await message.save()
+    res.status(201).json({
+        success: true,
+        error: null,
+        token
+    })
+} catch (err) {
+    res.status(400).json({ 
+        success: false,
+        error: err.message,
+        token: null
+    })
+}</code></pre>
+
+            <p>
+                Attempts to <code>save()</code> the new
+                <code>message</code>. If the user has entered correct
+                input, the <code>message</code> will be saved, and a
+                status 201 will return. The json data will contain a
+                true <code>success</code> flag, a null
+                <code>error</code> flag, and the generated
+                <code>token</code> string.
+            </p>
+        </section>
+    </div>
+</body>
+</html>

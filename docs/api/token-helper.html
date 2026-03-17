@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Token Helper Documentation</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Documentation</h2>
+        <a href="../index.html">Overview</a>
+        <a href="message.html">Message API</a>
+        <a href="token.html" class="active">Token Helpers</a>
+        <a href="../guides/setup.html">Setup & Running</a>
+    </div>
+
+    <div class="main">
+        <h1>Token Helper Module</h1>
+        <p>Functions for generating, storing, and validating one-time tokens.</p>
+
+        <h2>Constants</h2>
+        <pre><code>const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000</code></pre>
+        <p>Tokens expire after 24 hours (86400000 ms).</p>
+
+        <h2>Functions</h2>
+
+        <h3>generateToken()</h3>
+        <pre><code>function generateToken() {
+    return crypto.randomBytes(32).toString('hex')
+}</code></pre>
+
+        <h3>createToken()</h3>
+        <pre><code>async function createToken() {
+    const tokenString = generateToken()
+    const token = new Token({ token: tokenString })
+    await token.save()
+    return tokenString
+}</code></pre>
+
+        <h3>tokenError(errorMessage)</h3>
+        <pre><code>function tokenError(errorMessage) {
+    return {
+        success: false,
+        error: errorMessage,
+        name: null,
+        email: null,
+        message: null
+    }
+}</code></pre>
+
+        <h3>validateToken(providedToken)</h3>
+        <pre><code>async function validateToken(providedToken) {
+    const actualToken = await Token.findOne({ token: providedToken })
+    if (!actualToken) return tokenError("This link could not be found.")
+    if (actualToken.used) return tokenError("This link has already been used.")
+    const ageInMs = Date.now() - actualToken.createdAt
+    if (ageInMs > TOKEN_EXPIRATION_MS) return tokenError("This link has expired.")
+    actualToken.used = true
+    await actualToken.save()
+    return { success: true, token: actualToken }
+}</code></pre>
+
+        <h2>Usage Example</h2>
+        <pre><code>const { createToken, validateToken } = require('../helpers/tokenHelpers')
+
+const token = await createToken()
+const result = await validateToken(token)
+if(result.success) console.log('Token valid', result.token)
+else console.log('Token error', result.error)</code></pre>
+    </div>
+</body>
+</html>

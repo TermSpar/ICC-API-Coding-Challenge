@@ -43,7 +43,17 @@ router.get('/:token', async (req, res) => {
     // we'll only get here if the token exists
     // validToken.token retrieves the token object, the additional
     // .token retrieves the actual token ID
-    message = await Message.findOne({ token: validToken.token.token })
+    try {
+        message = await Message.findOne({ token: validToken.token.token })
+    } catch (err) {
+        res.status(500).json({ 
+            success: false,
+            error: err.message,
+            name: null,
+            email: null,
+            message: null 
+        })
+    }
 
     res.status(201).json({
         success: true,
@@ -77,7 +87,17 @@ router.get('/:token', async (req, res) => {
  * was a success.
  */
 router.post('/', async (req, res) => {
-    const token = await createToken()
+    let token 
+    try {
+        token = await createToken()
+    } catch (err) {
+        return res.status(500).json({ 
+            success: false,
+            error: err.message,
+            token: null
+        })
+    }
+
     const message = new Message({
         name: req.body.name,
         email: req.body.email,
@@ -87,7 +107,7 @@ router.post('/', async (req, res) => {
 
     // wrap in a try-catch because the .save() method is async
     try {
-        const newMessage = await message.save()
+        await message.save()
         // status 201 to indicate the successful creation of a message
         res.status(201).json({
             success: true,
