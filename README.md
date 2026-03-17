@@ -66,8 +66,7 @@ Full documentation is available on **Github Pages**:
 
 https://termspar.github.io/ICC-API-Coding-Challenge/
 
-It can also be viewed locally by opening
+It can also be viewed locally by opening the following in your browser:
 ```
 docs/index.html
 ```
-in your browser
