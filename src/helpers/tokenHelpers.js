@@ -13,6 +13,9 @@ const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000 // 24 hours
  */
 function generateToken() {
     return crypto.randomBytes(32).toString('hex') 
+
+    // HASH THIS //
+
 }
 
 /**
@@ -86,7 +89,12 @@ function tokenError(errorMessage) {
  */
 async function validateToken(providedToken) {
     // get the actual token
-    const actualToken = await Token.findOne({ token: providedToken })
+    let actualToken
+    try {
+        actualToken = await Token.findOne({ token: providedToken })
+    } catch (err) {
+        return tokenError(err.message)
+    }
 
     // if the token doesn't exist
     if (!actualToken)
@@ -103,7 +111,11 @@ async function validateToken(providedToken) {
 
     // if none of the errors obtain, mark token as used
     actualToken.used = true
-    await actualToken.save()
+    try {
+        await actualToken.save()
+    } catch (err) {
+        return tokenError(err.message)
+    }
 
     return { 
         success: true,

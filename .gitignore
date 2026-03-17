@@ -2,3 +2,4 @@
 node_modules
 route.rest
 .vscode
+.postman

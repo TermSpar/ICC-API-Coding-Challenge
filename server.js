@@ -23,7 +23,7 @@ app.use(express.json())
 /**
  * Route: Messages API: /message
  */
-const messageRouter = require('./routes/message')
+const messageRouter = require('./src/routes/message')
 app.use('/message', messageRouter)
 
 /**
