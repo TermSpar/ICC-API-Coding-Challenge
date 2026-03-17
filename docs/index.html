@@ -13,7 +13,7 @@
         <a href="index.html" class="active">Overview</a>
         <a href="api/message.html">Message API</a>
         <a href="api/token-helpers.html">Token Helpers</a>
-        <a href="guides/setup.html">Setup & Running</a>
+        <a href="api/models.html">Database Models</a>
     </div>
 
     <div class="main">
@@ -22,38 +22,17 @@
 
         <section class="section">
             <p>
-                This documentation describes a simple message API that allows users
-                to store a message and retrieve it later using a secure one-time token.
+                This documentation describes a simple API that has two endpoints.
+                One allows the user to create a message that has a name, email, and
+                unique token attached. The other allows the user to use the unique
+                token to access the originally attached message, name, and email.
             </p>
 
             <p>
-                When a message is created, the system generates a unique token that
-                can be used to retrieve that message exactly once. Tokens expire after
-                24 hours and are marked as used once the message has been accessed.
+                When a message is created, a unique token is generated. Tokens automatically
+                expire after 24-hours or after they have been used.
             </p>
         </section>
-
-
-        <section class="section">
-            <h2>System Overview</h2>
-
-            <p>
-                The system consists of two primary components:
-            </p>
-
-            <ul>
-                <li>
-                    <strong>Message API</strong> – Handles creation and retrieval of
-                    stored messages.
-                </li>
-
-                <li>
-                    <strong>Token Helpers</strong> – Utility functions responsible for
-                    generating and validating secure one-time tokens.
-                </li>
-            </ul>
-        </section>
-
 
         <section class="section">
             <h2>Documentation Sections</h2>
@@ -67,7 +46,7 @@
                 <tr>
                     <td><a href="api/message.html">Message API</a></td>
                     <td>
-                        Documentation for the API endpoints used to create
+                        Details about API endpoints used to create
                         and retrieve messages.
                     </td>
                 </tr>
@@ -81,10 +60,10 @@
                 </tr>
 
                 <tr>
-                    <td><a href="guides/setup.html">Setup & Running</a></td>
+                    <td><a href="api/models.html">Database Models</a></td>
                     <td>
-                        Instructions for installing dependencies and running
-                        the API locally.
+                        Details about the Mongoose document objects used
+                        and stored in the database.
                     </td>
                 </tr>
             </table>
@@ -102,7 +81,7 @@
 
             <p>
                 Messages can be created using a POST request and retrieved
-                later using the generated token.
+                later using a GET request with the generated token.
             </p>
         </section>
 

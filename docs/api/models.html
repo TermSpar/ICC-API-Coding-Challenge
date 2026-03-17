@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Database Models Documentation</title>
+    <link rel="stylesheet" href="../css/style.css">
+  </head>
+
+  <body>
+
+```
+<div class="sidebar">
+  <h2>Documentation</h2>
+  <a href="../index.html">Overview</a>
+  <a href="../api/message.html">Message API</a>
+  <a href="../api/token-helpers.html">Token Helpers</a>
+  <a href="models.html" class="active">Database Models</a>
+</div>
+
+<div class="main">
+
+  <h1>Database Models</h1>
+
+  <section class="section">
+
+    <p>
+    The application stores its data using MongoDB through the
+    mongoose ODM (Object Document Mapper). Two models define the database structure:
+    </p>
+
+     <table>
+        <tr>
+            <th>Model</th>
+            <th>Description</th>
+        </tr>
+
+        <tr>
+            <td>Message</td>
+            <td>A specified message with a name, email, and token attached.</td>
+        </tr>
+
+        <tr>
+            <td>Token</td>
+            <td>A unique token that can be used to retrieve messages.</td>
+        </tr>
+    </table>
+
+    <p>
+    These schemas enforce the structure of documents stored in the
+    MongoDB collections.
+    </p>
+
+  </section>
+
+  <section class="section">
+
+    <h2>Message Model</h2>
+
+    <p>
+    Stores user-submitted messages along with the name, email,
+    and the one-time token that allows retrieving the message later.
+    </p>
+
+    <h3>Fields</h3>
+
+    <table>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+
+      <tr>
+        <td>success</td>
+        <td>Boolean</td>
+        <td>No</td>
+        <td>Indicates whether the message was successfully created.</td>
+      </tr>
+
+      <tr>
+        <td>error</td>
+        <td>String</td>
+        <td>No</td>
+        <td>Provides any error message.</td>
+      </tr>
+
+      <tr>
+        <td>name</td>
+        <td>String</td>
+        <td>Yes</td>
+        <td>Name attached to the message.</td>
+      </tr>
+
+      <tr>
+        <td>email</td>
+        <td>String</td>
+        <td>Yes</td>
+        <td>Email address attached to the message.</td>
+      </tr>
+
+      <tr>
+        <td>message</td>
+        <td>String</td>
+        <td>Yes</td>
+        <td>The message content itself.</td>
+      </tr>
+
+      <tr>
+        <td>token</td>
+        <td>String</td>
+        <td>No</td>
+        <td>One-time token string associated with the message.</td>
+      </tr>
+
+    </table>
+
+    <h3>Implementation</h3>
+
+<pre><code>
+const mongoose = require('mongoose')
+
+const messageSchema = new mongoose.Schema({
+    success: {
+        type: Boolean
+    },
+    error: {
+        type: String
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    },
+    message: {
+        type: String,
+        required: true,
+    },
+    token: {
+        type: String,
+    }
+})
+
+module.exports = mongoose.model('Message', messageSchema)
+</code></pre>
+
+    <p>
+    <b>Note:</b> The <code>name</code>, <code>email</code>, and <code>message</code> fields 
+    are the only ones <code>required</code> because their content is provided by the user.
+    The <code>success</code>, <code>error</code>, and <code>token</code> fields will
+    be populated by the API itself and so their requirement need not be enforced.
+    </p>
+
+  </section>
+
+
+
+  <section class="section">
+
+    <h2>Token Model</h2>
+
+    <p>
+    Stores one-time tokens that allow users to retrieve messages.
+    Each token is unique, can only be used once, and expires after 24-hours.
+    </p>
+
+    <h3>Fields</h3>
+
+    <table>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Default</th>
+        <th>Description</th>
+      </tr>
+
+      <tr>
+        <td>token</td>
+        <td>String</td>
+        <td>None</td>
+        <td>The unique token string itself.</td>
+      </tr>
+
+      <tr>
+        <td>createdAt</td>
+        <td>Date</td>
+        <td>Date.now</td>
+        <td>Token creation date.</td>
+      </tr>
+
+      <tr>
+        <td>used</td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>Indicates whether the token has already been used.</td>
+      </tr>
+
+    </table>
+
+    <h3>Implementation</h3>
+
+<pre><code>
+const mongoose = require('mongoose')
+
+const tokenSchema = new mongoose.Schema({
+    token: {
+        type: String,
+        unique: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
+    used: {
+        type: Boolean,
+        default: false 
+    }
+})
+
+module.exports = mongoose.model('Token', tokenSchema)
+</code></pre>
+
+    <p>
+    <b>Note:</b> The expiration logic for tokens is handled in the
+    <a href="../api/token-helpers.html">tokenHelpers.js</a> module 
+    rather than in the schema. This is because using <code>expires</code>
+    would delete the object from the database, which would prevent
+    informing the user that the token, in fact, expired.
+    </p>
+
+  </section>
+
+</div>
+
+  </body>
+</html>
