@@ -97,7 +97,7 @@ Response (201 Created)
 **Make sure you save the token.** Since it will be stored as a hashed string in the database,
 there will be no other way to access this token once the response message is gone.  
   
-Once you have your token, you can retrieve all of the data attached to your message via a GET request from `http://SERVER_HOST:SERVER_PORT/message/:token`. For example:  
+Once you have your token, you can retrieve all of the data attached to your message via a GET request to `http://SERVER_HOST:SERVER_PORT/message/:token`. For example:  
   
 **GET** `/message/actual-generated-token-string`  
   
