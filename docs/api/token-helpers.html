@@ -1,173 +1,155 @@
 <!DOCTYPE html>
-
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <title>Token Helper Documentation</title>
     <link rel="stylesheet" href="../css/style.css">
-  </head>
+</head>
 
-  <body>
+<body>
 
     <div class="sidebar">
-      <h2>ICC API Documentation</h2>
-      <a href="../index.html">Overview</a>
-      <a href="message.html">Message API</a>
-      <a href="token.html" class="active">Token Helpers</a>
-      <a href="models.html">Database Models</a>
+        <h2>ICC API Documentation</h2>
+        <a href="../index.html">Overview</a>
+        <a href="message.html">Message API</a>
+        <a href="token.html" class="active">Token Helpers</a>
+        <a href="models.html">Database Models</a>
     </div>
 
     <div class="main">
 
-      <h1>Token Helper Functions</h1>
+        <h1>Token Helper Functions</h1>
 
-      <section class="section">
+        <section class="section">
+            <p>
+                The token helper module provides utility functions used by the API to generate,
+                store, and validate one-time tokens for retrieving messages.
+            </p>
+        </section>
 
-        <p>
-        The token helper module provides utility functions used by the API to generate,
-        store, and validate one-time tokens for retrieving messages.
-        </p>
+        <section class="section">
+            <h2>Exported Functions</h2>
 
-        <p>
-        Tokens are stored in MongoDB and follow these rules:
-        </p>
+            <table>
+                <tr>
+                    <th>Function</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><a href="#hashToken">hashToken()</a></td>
+                    <td>Hashes a token for storage in/comparison with the database.</td>
+                </tr>
+                <tr>
+                    <td><a href="#createToken">createToken()</a></td>
+                    <td>Creates a secure token, stores it in the database, and returns the token string.</td>
+                </tr>
+                <tr>
+                    <td><a href="#validateToken">validateToken()</a></td>
+                    <td>Validates a token by ensuring that it exists, has not been used, and has not expired.</td>
+                </tr>
+            </table>
+            
+            <div style="height: 20px;"></div>
+            <h2>Internal Helper Functions</h2>
 
-        <ul>
-          <li>Each token may only be used once.</li>
-          <li>Tokens expire after 24 hours.</li>
-          <li>Invalid tokens return standardized error responses.</li>
-        </ul>
+            <table>
+                <tr>
+                    <th>Function</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><a href="#generateToken">generateToken()</a></td>
+                    <td>Generates token string.</td>
+                </tr>
+                <tr>
+                    <td><a href="#tokenError">tokenError()</a></td>
+                    <td>Generates standardized error output.</td>
+                </tr>
+            </table>
+        </section>
 
-        <p>
-        These helpers are imported by the API routes and ensure that token
-        creation and validation logic is organized in one location.
-        </p>
+        <section class="section" id="hashToken">
+            <h2>hashToken()</h2>
 
-      </section>
+            <p>
+                Hashes a <code>token</code> string using SHA-256.
+            </p>
 
+            <h3>Parameters</h3>
 
-      <section class="section">
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>token</td>
+                    <td>string</td>
+                    <td>The generated token string to be hashed.</td>
+                </tr>
+            </table>
 
-        <h2>Exported Functions</h2>
+            <h3>Return Value</h3>
 
-        <table>
-          <tr>
-            <th>Function</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>hashedToken</td>
+                    <td>string</td>
+                    <td>The hashed token usable for safe storage in the database.</td>
+                </tr>
+            </table>
 
-          <tr>
-            <td>hashToken()</td>
-            <td>non-async function</td>
-            <td>Hashes a token for storage in/comparison with the database.</td>
-          </tr>
-
-          <tr>
-            <td>createToken()</td>
-            <td>async function</td>
-            <td>Creates a secure token, stores it in the database, and returns the token string.</td>
-          </tr>
-
-          <tr>
-            <td>validateToken()</td>
-            <td>async function</td>
-            <td>Validates a token by ensuring that it exists, has not been used, and has not expired.</td>
-          </tr>
-        </table>
-
-      </section>
-
-      <section class="section">
-
-        <h2>hashToken()</h2>
-
-        <p>
-        Hashes a <code>token</code> string using SHA-256.
-        </p>
-
-        <h3>Parameters</h3>
-
-        <table>
-          <tr>
-            <th>Field</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
-
-          <tr>
-            <td>token</td>
-            <td>string</td>
-            <td>The generated token string to be hashed.</td>
-          </tr>
-        </table>
-
-        <h3>Return Value</h3>
-
-        <table>
-          <tr>
-            <th>Field</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
-
-          <tr>
-            <td>hashedToken</td>
-            <td>string</td>
-            <td>The hashed token usable for safe storage in the database.</td>
-          </tr>
-        </table>
-
-        <h3>Implementation Details</h3>
-
-<pre><code>
+            <h3>Implementation Details</h3>
+            <pre><code>
 function hashToken(token) {
     return crypto
         .createHash('sha256')
         .update(token)
         .digest('hex')
 }
-</code></pre>
+            </code></pre>
 
-        <p>
-        The <code>hashToken()</code> makes use of the <code>crypto</code> module's
-        SHA-256 hash function to securely store the generated tokens in the database.
-        </p>
+            <p>
+                Uses the <code>crypto</code> module's SHA-256 hash function to securely store the 
+                generated tokens in the database.
+            </p>
 
-        <p>
-          <strong>Note:</strong> this function is being exported because <a href="message.html">message.js</a>
-          will need to make use of it when storing its own token information.
-        </p>
+            <p>
+                <strong>Note:</strong> this function is being exported because <a href="message.html">message.js</a>
+                will need to make use of it when storing its own token information.
+            </p>
+        </section>
 
-      </section>
+        <section class="section" id="createToken">
+            <h2>createToken()</h2>
 
-      <section class="section">
+            <p>
+                Creates a <code>Token</code> Mongoose document and stores it in the database.
+            </p>
 
-        <h2>createToken()</h2>
+            <h3>Return Value</h3>
 
-        <p>
-        Creates a <code>Token</code> Mongoose document and stores it in the database.
-        </p>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>token</td>
+                    <td>string</td>
+                    <td>The generated token string returned to the API.</td>
+                </tr>
+            </table>
 
-        <h3>Return Value</h3>
-
-        <table>
-          <tr>
-            <th>Field</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
-
-          <tr>
-            <td>token</td>
-            <td>string</td>
-            <td>The generated token string returned to the API.</td>
-          </tr>
-        </table>
-
-        <h3>Implementation Details</h3>
-
-<pre><code>
+            <h3>Implementation Details</h3>
+            <pre><code>
 async function createToken() {
     const tokenString = generateToken()
     const hashedToken = hashToken(tokenString)
@@ -179,119 +161,113 @@ async function createToken() {
     await token.save()
     return tokenString
 }
-</code></pre>
+            </code></pre>
 
-        <p>
-        The <code>createToken()</code> function must be async because it calls the (async) <code>save()</code> 
-        function on the new <code>token</code>.
-        </p>
+            <p>
+                The <code>hashedToken</code> is stored in the database on the <code>Token</code> Mongoose document.
+                The <code>tokenString</code> itself is returned to the user. This ensures that only the user
+                has access to the actual token.
+            </p>
 
-        <p>
-        <strong>Note:</strong> the <code>hashedToken</code> is stored in the database
-        while the <code>tokenString</code> itself is returned to the user. This ensures that only the user
-        has access to the actual token.
-        </p>
+            <p>
+                <strong>Note:</strong> the <code>createToken()</code> function must be async because it calls the 
+                async <code>save()</code> function on the new <code>token</code>.
+            </p>
+        </section>
 
-      </section>
+        <section class="section" id="validateToken">
+            <h2>validateToken()</h2>
 
-       <section class="section">
+            <p>
+                Determines whether a token provided by a user is valid.
+            </p>
 
-        <h2>validateToken()</h2>
+            <h3>Parameters</h3>
 
-        <p>
-        Determines whether a token provided by a user is valid.
-        </p>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>providedToken</td>
+                    <td>string</td>
+                    <td>The token provided by the user in the link.</td>
+                </tr>
+            </table>
 
-        <h3>Parameters</h3>
+            <h3>Return Value</h3>
 
-        <table>
-          <tr>
-            <th>Field</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>success</td>
+                    <td>boolean</td>
+                    <td>Indicates whether the token validation succeeds.</td>
+                </tr>
+                <tr>
+                    <td>token</td>
+                    <td>object | null</td>
+                    <td>The validated token object from the database if validation succeeds. Null if validation fails.</td>
+                </tr>
+                <tr>
+                    <td>error</td>
+                    <td>string | null</td>
+                    <td>Error message describing why validation failed. Null if validation succeeds.</td>
+                </tr>
+                <tr>
+                    <td>name</td>
+                    <td>null</td>
+                    <td>This will only return if validation fails. Always null in the standardized error response to maintain consistent API shape.</td>
+                </tr>
+                <tr>
+                    <td>email</td>
+                    <td>null</td>
+                    <td>This will only return if validation fails. Always null in the standardized error response to maintain consistent API shape.</td>
+                </tr>
+                <tr>
+                    <td>message</td>
+                    <td>null</td>
+                    <td>This will only return if validation fails. Always null in the standardized error response to maintain consistent API shape.</td>
+                </tr>
+            </table>
 
-          <tr>
-            <td>providedToken</td>
-            <td>string</td>
-            <td>The token provided by the user in the link.</td>
-          </tr>
-        </table>
+            <h3>Example Success Response</h3>
+            <pre><code>
+{
+    "success": true,
+    "token": { ...token object... }
+}
+            </code></pre>
 
-        <h3>Return Value</h3>
+            <h3>Example Error Response</h3>
+            <pre><code>
+{
+    "success": false,
+    "error": "This link has expired.",
+    "name": null,
+    "email": null,
+    "message": null
+}
+            </code></pre>
 
-        <table>
-          <tr>
-            <th>Field</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
+            <h3>Implementation Summary</h3>
+            <ol>
+                <li>Confirm the token exists in the database.</li>
+                <li>Ensure the token has not already been used.</li>
+                <li>Check whether the token has expired (24 hours).</li>
+                <li>If valid, mark the token as used.</li>
+            </ol>
 
-          <tr>
-            <td>success</td>
-            <td>boolean</td>
-            <td>
-              Indicates whether the token validation succeeds.
-            </td>
-          </tr>
-
-          <tr>
-            <td>token</td>
-            <td>object | null</td>
-            <td>
-              The validated token object from the database if validation succeeds. 
-              Null if validation fails.
-            </td>
-          </tr>
-
-          <tr>
-            <td>error</td>
-            <td>string | null</td>
-            <td>
-              Error message describing why validation failed. Null if validation succeeds.
-            </td>
-          </tr>
-
-          <tr>
-            <td>name</td>
-            <td>null</td>
-            <td>
-              This will only return if validation fails.
-              Always null in the standardized error response to maintain consistent API shape.
-            </td>
-          </tr>
-
-          <tr>
-            <td>email</td>
-            <td>null</td>
-            <td>
-              This will only return if validation fails.
-              Always null in the standardized error response to maintain consistent API shape.
-            </td>
-          </tr>
-
-          <tr>
-            <td>message</td>
-            <td>null</td>
-            <td>
-              This will only return if validation fails.
-              Always null in the standardized error response to maintain consistent API shape.
-            </td>
-          </tr>
-        </table>
-
-        <h3>Validation Steps</h3>
-
-        <ol>
-          <li>Confirm the token exists in the database.</li>
-          <li>Ensure the token has not already been used.</li>
-          <li>Check whether the token has expired (24 hours).</li>
-          <li>If valid, mark the token as used.</li>
-        </ol>
-
-        <h3>Implementation Details</h3>
-
-<pre><code>
+            <h3>Implementation Details</h3>
+            <details>
+                <summary>Click to expand</summary>
+            <pre><code>
 const hashedToken = hashToken(providedToken)
 let actualToken
 
@@ -300,17 +276,20 @@ try {
 } catch (err) {
     return tokenError(err.message)
 }
-</code></pre>
+            </code></pre>
 
-        <p>
-        The function first attempts to find the token in the database (which
-        must be checked using a hashed version of the token since the hash is
-        what is actually in the database). If the database query fails, a 
-        standardized error response is returned. Otherwise, the
-        token is stored in the <code>actualToken</code> variable. 
-        </p>
+            <p>
+                The function first attempts to find the token in the database (which
+                must be checked using a hashed version of the token since the hash is
+                what is actually in the database).
+            </p>
 
-<pre><code>
+            <p>
+                If the database query fails, a standardized error response is returned. Otherwise, the
+                token is stored in the <code>actualToken</code> variable. 
+            </p>
+
+            <pre><code>
 if (!actualToken)
     return tokenError("This link could not be found.")
 
@@ -320,15 +299,19 @@ if (ageInMs > TOKEN_EXPIRATION_MS)
 
 if (actualToken.used)
     return tokenError("This link has already been used.")
-</code></pre>
+            </code></pre>
 
-        <p>
-        If the token cannot be found, has expired 
-        (<code>const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000</code>, i.e. 24 hours) 
-        or has already been used once, validation fails and an appropriate error message is returned.
-        </p>
+            <p>
+                If the token cannot be found, has expired or has already been used once, 
+                validation fails and an appropriate error message is returned.
+            </p>
 
-<pre><code>
+            <p>
+                <strong>Note:</strong> <code>const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000</code>
+                is 24 hours.
+            </p>
+
+            <pre><code>
 actualToken.used = true
 
 try {
@@ -336,126 +319,63 @@ try {
 } catch (err) {
     return tokenError(err.message)
 }
-</code></pre>
+            </code></pre>
 
-        <p>
-        If the token is valid, it is marked as used and
-        saved back to the database to enforce the one-time use rule.
-        </p>
+            <p>
+                If the token is valid, it is marked as used and saved back to the database to enforce the one-time use rule.
+            </p>
+            </details>
+        </section>
 
-        <h3>Successful Response</h3>
+        <section class="section" id="generateToken">
+            <h2>generateToken()</h2>
 
-<pre><code>
-{
-    "success": true,
-    "token": { ...token object... }
-}
-</code></pre>
+            <p>
+                Creates a cryptographically secure random token string using Node's
+                <code>crypto</code> module.
+            </p>
 
-        <p>
-        When validation succeeds, the response contains a true
-        <code>success</code> flag and the validated token document.
-        </p>
+            <p>
+                The token is generated as 256 bits (32 bytes) of random data and
+                encoded as a 64-character hexadecimal string.
+            </p>
 
-        <h3>Error Response</h3>
-
-<pre><code>
-{
-    "success": false,
-    "error": "This link has expired.",
-    "name": null,
-    "email": null,
-    "message": null
-}
-</code></pre>
-
-        <p>
-        If validation fails, a standardized error response generated by
-        <code>tokenError()</code> is returned.
-        </p>
-
-      </section>
-
-      <section class="section">
-
-        <h2>Internal Helper Functions</h2>
-
-        <table>
-          <tr>
-            <th>Function</th>
-            <th>Description</th>
-          </tr>
-
-          <tr>
-            <td>generateToken()</td>
-            <td>Generates token string.</td>
-          </tr>
-
-          <tr>
-            <td>tokenError()</td>
-            <td>Generates standarized error output.</td>
-          </tr>
-        </table>
-
-      </section>
-
-
-      <section class="section">
-
-        <h2>generateToken()</h2>
-
-        <p>
-        Creates a cryptographically secure random token string using Node's
-        <code>crypto</code> module.
-        </p>
-
-        <p>
-        The token is generated as 256 bits (32 bytes) of random data and
-        encoded as a 64-character hexadecimal string.
-        </p>
-
-        <h3>Implementation</h3>
-
-<pre><code>
+            <h3>Implementation</h3>
+            <pre><code>
 function generateToken() {
     return crypto.randomBytes(32).toString('hex')
 }
-</code></pre>
+            </code></pre>
 
-        <p>
-        The use of <code>crypto.randomBytes()</code> makes sure that the token
-        cannot be easily predicted or replicated.
-        </p>
+            <p>
+                The use of <code>crypto.randomBytes()</code> makes sure that the token
+                cannot be easily predicted or replicated.
+            </p>
+        </section>
 
-      </section>
+        <section class="section" id="tokenError">
+            <h2>tokenError()</h2>
 
-      <section class="section">
+            <p>
+                Generates a standardized error response when an invalid token is provided.
+            </p>
 
-        <h2>tokenError()</h2>
+            <h3>Parameters</h3>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>errorMessage</td>
+                    <td>string</td>
+                    <td>The message describing why token validation failed.</td>
+                </tr>
+            </table>
 
-        <p>
-        Generates a standardized error response when an invalid token is provided.
-        </p>
-
-        <h3>Parameters</h3>
-
-        <table>
-          <tr>
-            <th>Parameter</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
-
-          <tr>
-            <td>errorMessage</td>
-            <td>string</td>
-            <td>The message describing why token validation failed.</td>
-          </tr>
-        </table>
-
-        <h3>Implementation</h3>
-
-<pre><code>
+            <h3>Implementation</h3>
+            <pre><code>
 function tokenError(errorMessage) {
     return {
         success: false,
@@ -465,15 +385,16 @@ function tokenError(errorMessage) {
         message: null
     }
 }
-</code></pre>
+            </code></pre>
 
-        <p>In addition to the provided <code>errorMessage</code>, the json response always includes the <code>name</code>, <code>email</code>,
-        and <code>message</code> fields so that the API response format
-        remains consistent even when an error occurs.</p>
-
-      </section>
+            <p>
+                In addition to the provided <code>errorMessage</code>, the JSON response always includes the <code>name</code>, <code>email</code>,
+                and <code>message</code> fields so that the API response format
+                remains consistent even when an error occurs.
+            </p>
+        </section>
 
     </div>
 
-  </body>
+</body>
 </html>

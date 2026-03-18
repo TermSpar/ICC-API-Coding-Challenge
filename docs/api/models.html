@@ -26,25 +26,8 @@
 
     <p>
     The application stores its data using MongoDB through the
-    mongoose ODM (Object Document Mapper). Two models define the database structure:
+    mongoose ODM (Object Document Mapper).
     </p>
-
-     <table>
-        <tr>
-            <th>Model</th>
-            <th>Description</th>
-        </tr>
-
-        <tr>
-            <td>Message</td>
-            <td>A specified message (250 character limit) with a name, email, and token attached.</td>
-        </tr>
-
-        <tr>
-            <td>Token</td>
-            <td>A unique token that can be used to retrieve messages.</td>
-        </tr>
-    </table>
 
     <p>
     These schemas enforce the structure of documents stored in the
@@ -54,6 +37,27 @@
   </section>
 
   <section class="section">
+    <h2>Schemas</h2>
+    <table>
+        <tr>
+            <th>Model</th>
+            <th>Description</th>
+        </tr>
+
+        <tr>
+            <td><a href="#Message">Message</a></td>
+            <td>A specified message (250 character limit) with a name, email, and token attached.</td>
+        </tr>
+
+        <tr>
+            <td><a href="#Token">Token</a></td>
+            <td>A unique token that can be used to retrieve messages.</td>
+        </tr>
+    </table>
+
+  </section>
+
+  <section class="section" id="Message">
 
     <h2>Message Model</h2>
 
@@ -160,7 +164,7 @@ module.exports = mongoose.model('Message', messageSchema)
 
 
 
-  <section class="section">
+  <section class="section" id="Token">
 
     <h2>Token Model</h2>
 
