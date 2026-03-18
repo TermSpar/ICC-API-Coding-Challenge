@@ -17,8 +17,7 @@
     <section class="section">
 
         <p>
-            This document explains the setup of the Node.js server for the ICC API, including
-            environment configuration, MongoDB connection, middleware, routes, and server startup.
+            Setup for the Node.js server, its routes, and connection to the MongoDB.
         </p>
 
     </section>
@@ -62,13 +61,11 @@
         <h2>MongoDB Connection</h2>
 
         <p>
-            The server connects to MongoDB using Mongoose. The connection URI is built from
-            environment variables with defaults.
+            The server connects to MongoDB using Mongoose. The connection URI is constructed from
+            environment variables (with defaults).
         </p>
 
-        <h3>Implementation Details</h3>
-        <details>
-            <summary>Click to expand</summary>
+        <h3>Implementation</h3>
 
 <pre><code>
 const mongoURI = `mongodb://${DB_HOST}/${DB_NAME}`
@@ -79,18 +76,6 @@ db.on('error', (error) => console.error('Database connection error:', error))
 db.once('open', () => console.log(`Connected to Database: ${DB_NAME} at ${DB_HOST}`))
 </code></pre>
 
-            <p>
-                The <code>mongoose.connect()</code> method is called with the constructed
-                <code>mongoURI</code> string.
-            </p>
-
-            <p>
-                <code>db.on('error')</code> logs any connection errors.
-                <code>db.once('open')</code> confirms successful connection to the database.
-            </p>
-
-        </details>
-
     </section>
 
     <section class="section">
@@ -98,23 +83,14 @@ db.once('open', () => console.log(`Connected to Database: ${DB_NAME} at ${DB_HOS
         <h2>Middleware</h2>
 
         <p>
-            Express middleware is used to parse incoming JSON payloads.
+            Express.js middleware is used to parse incoming JSON payloads.
         </p>
 
-        <h3>Implementation Details</h3>
-        <details>
-            <summary>Click to expand</summary>
+        <h3>Implementation</h3>
 
 <pre><code>
 app.use(express.json())
 </code></pre>
-
-            <p>
-                This allows the server to automatically parse JSON in request bodies,
-                making <code>req.body</code> available in routes.
-            </p>
-
-        </details>
 
     </section>
 
@@ -126,20 +102,12 @@ app.use(express.json())
             The server uses the <code>messageRouter</code> for all routes prefixed with <code>/message</code>.
         </p>
 
-        <h3>Implementation Details</h3>
-        <details>
-            <summary>Click to expand</summary>
+        <h3>Implementation</h3>
 
 <pre><code>
 const messageRouter = require('./src/routes/message')
 app.use('/message', messageRouter)
 </code></pre>
-
-            <p>
-                All requests to <code>/message</code> are handled by the imported <code>messageRouter</code>.
-            </p>
-
-        </details>
 
     </section>
 
@@ -151,22 +119,13 @@ app.use('/message', messageRouter)
             The Express server is started using the specified host and port.
         </p>
 
-        <h3>Implementation Details</h3>
-        <details>
-            <summary>Click to expand</summary>
+        <h3>Implementation</h3>
 
 <pre><code>
 app.listen(SERVER_PORT, SERVER_HOST, () =>
   console.log(`Server started on http://${SERVER_HOST}:${SERVER_PORT}`)
 )
 </code></pre>
-
-            <p>
-                The server listens on <code>SERVER_HOST:SERVER_PORT</code> and logs a message
-                when startup is successful.
-            </p>
-
-        </details>
 
     </section>
 

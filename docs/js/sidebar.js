@@ -4,16 +4,16 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!placeholder) {
     placeholder = document.createElement('div');
     placeholder.id = 'sidebar-placeholder';
-    document.body.prepend(placeholder); // inject at the top
+    document.body.prepend(placeholder); // place at the top
   }
 
-  // Fetch sidebar HTML and insert it
+  // Get sidebar HTML and insert it
   fetch('includes/sidebar.html')
     .then(response => response.text())
     .then(html => {
       placeholder.innerHTML = html;
 
-      // Auto-highlight current page
+      // Auto-select current page
       const currentPath = window.location.pathname.split('/').pop(); // get filename
       const links = placeholder.querySelectorAll('a');
       links.forEach(link => {
