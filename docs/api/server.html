@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Server Setup Documentation</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>ICC API Documentation</h2>
+    <a href="../index.html">Overview</a>
+    <a href="message.html">Message API</a>
+    <a href="token.html">Token Helpers</a>
+    <a href="server.html" class="active">Server Setup</a>
+    <a href="models.html">Database Models</a>
+</div>
+
+<div class="main">
+
+    <h1>Server Setup</h1>
+
+    <section class="section">
+
+        <p>
+            This document explains the setup of the Node.js server for the ICC API, including
+            environment configuration, MongoDB connection, middleware, routes, and server startup.
+        </p>
+
+    </section>
+
+    <section class="section">
+
+        <h2>Environment Variables</h2>
+
+        <table>
+            <tr>
+                <th>Variable</th>
+                <th>Default</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>DB_HOST</td>
+                <td>localhost</td>
+                <td>Host address for MongoDB connection.</td>
+            </tr>
+            <tr>
+                <td>DB_NAME</td>
+                <td>bollinger-test</td>
+                <td>Name of the MongoDB database.</td>
+            </tr>
+            <tr>
+                <td>SERVER_HOST</td>
+                <td>localhost</td>
+                <td>Host address to start the server.</td>
+            </tr>
+            <tr>
+                <td>SERVER_PORT</td>
+                <td>3000</td>
+                <td>Port number for the server to listen on.</td>
+            </tr>
+        </table>
+
+    </section>
+
+    <section class="section">
+
+        <h2>MongoDB Connection</h2>
+
+        <p>
+            The server connects to MongoDB using Mongoose. The connection URI is built from
+            environment variables with defaults.
+        </p>
+
+        <h3>Implementation Details</h3>
+        <details>
+            <summary>Click to expand</summary>
+
+<pre><code>
+const mongoURI = `mongodb://${DB_HOST}/${DB_NAME}`
+mongoose.connect(mongoURI)
+const db = mongoose.connection
+
+db.on('error', (error) => console.error('Database connection error:', error))
+db.once('open', () => console.log(`Connected to Database: ${DB_NAME} at ${DB_HOST}`))
+</code></pre>
+
+            <p>
+                The <code>mongoose.connect()</code> method is called with the constructed
+                <code>mongoURI</code> string.
+            </p>
+
+            <p>
+                <code>db.on('error')</code> logs any connection errors.
+                <code>db.once('open')</code> confirms successful connection to the database.
+            </p>
+
+        </details>
+
+    </section>
+
+    <section class="section">
+
+        <h2>Middleware</h2>
+
+        <p>
+            Express middleware is used to parse incoming JSON payloads.
+        </p>
+
+        <h3>Implementation Details</h3>
+        <details>
+            <summary>Click to expand</summary>
+
+<pre><code>
+app.use(express.json())
+</code></pre>
+
+            <p>
+                This allows the server to automatically parse JSON in request bodies,
+                making <code>req.body</code> available in routes.
+            </p>
+
+        </details>
+
+    </section>
+
+    <section class="section">
+
+        <h2>Routes</h2>
+
+        <p>
+            The server uses the <code>messageRouter</code> for all routes prefixed with <code>/message</code>.
+        </p>
+
+        <h3>Implementation Details</h3>
+        <details>
+            <summary>Click to expand</summary>
+
+<pre><code>
+const messageRouter = require('./src/routes/message')
+app.use('/message', messageRouter)
+</code></pre>
+
+            <p>
+                All requests to <code>/message</code> are handled by the imported <code>messageRouter</code>.
+            </p>
+
+        </details>
+
+    </section>
+
+    <section class="section">
+
+        <h2>Server Startup</h2>
+
+        <p>
+            The Express server is started using the specified host and port.
+        </p>
+
+        <h3>Implementation Details</h3>
+        <details>
+            <summary>Click to expand</summary>
+
+<pre><code>
+app.listen(SERVER_PORT, SERVER_HOST, () =>
+  console.log(`Server started on http://${SERVER_HOST}:${SERVER_PORT}`)
+)
+</code></pre>
+
+            <p>
+                The server listens on <code>SERVER_HOST:SERVER_PORT</code> and logs a message
+                when startup is successful.
+            </p>
+
+        </details>
+
+    </section>
+
+</div>
+
+</body>
+</html>
