@@ -32,6 +32,15 @@ app.use(express.json())
 const messageRouter = require('./src/routes/message')
 app.use('/message', messageRouter)
 
+// Catch 404 exception
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: `Route '${req.originalUrl}' not found`,
+    suggestion: "Try '/message'"
+  })
+})
+
 /**
  * Start server
  */
