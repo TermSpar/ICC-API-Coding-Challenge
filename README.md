@@ -77,7 +77,7 @@ Once the server is running and connected to the database, you can use the API th
   
 First, you will want to create a `Message` via a POST request to `http://SERVER_HOST:SERVER_PORT/message`. It should contain string data for the `name`, `email`, and `message` fields. For example:  
   
-**POST** `/message`  
+**POST** `http://localhost:3000/message`  
 Request Body (JSON)
 ```
 {
@@ -97,9 +97,9 @@ Response (201 Created)
 **Make sure you save the token.** Since it will be stored as a hashed string in the database,
 there will be no other way to access this token once the response message is gone.  
   
-Once you have your token, you can retrieve all of the data attached to your message via a GET request from `http://SERVER_HOST:SERVER_PORT/message/:token`. For example:  
+Once you have your token, you can retrieve all of the data attached to your message via a GET request to `http://SERVER_HOST:SERVER_PORT/message/:token`. For example:  
   
-**GET** `/message/actual-generated-token-string`  
+**GET** `http://localhost:3000/message/actual-generated-token-string`  
   
 Response (200 OK)  
 ```
