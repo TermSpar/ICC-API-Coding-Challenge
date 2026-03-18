@@ -138,7 +138,7 @@ try {
             </p>
 
             <p>
-                Note: we must <code>return</code> this error otherwise the program
+                <strong>Note:</strong> we must <code>return</code> this error otherwise the program
                 would continue with a null <code>message</code>.
             </p>
 
@@ -272,7 +272,7 @@ const message = new Message({
     name: req.body.name,
     email: req.body.email,
     message: req.body.message,
-    token
+    token: hashToken(token)
 })
             </code></pre>
 
@@ -280,6 +280,12 @@ const message = new Message({
                 A new <code>Message</code> Mongoose document is created with
                 the name, email, and message provided by the user.
                 The newly generated <code>token</code> is also attached.
+            </p>
+
+            <p>
+                <strong>Note:</strong> the <code>token</code> is passed as <code>hashedToken</code>.
+                This is because the actual token string needs to be given to the user (from 
+                <code>createToken()</code>), while the hashed token needs to be stored in the database.
             </p>
 
 

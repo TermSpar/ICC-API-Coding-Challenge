@@ -58,6 +58,12 @@
           </tr>
 
           <tr>
+            <td>hashToken()</td>
+            <td>non-async function</td>
+            <td>Hashes a token for storage in/comparison with the database.</td>
+          </tr>
+
+          <tr>
             <td>createToken()</td>
             <td>async function</td>
             <td>Creates a secure token, stores it in the database, and returns the token string.</td>
@@ -72,8 +78,70 @@
 
       </section>
 
+      <section class="section">
 
-        <section class="section">
+        <h2>hashToken()</h2>
+
+        <p>
+        Hashes a <code>token</code> string using SHA-256.
+        </p>
+
+        <h3>Parameters</h3>
+
+        <table>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+
+          <tr>
+            <td>token</td>
+            <td>string</td>
+            <td>The generated token string to be hashed.</td>
+          </tr>
+        </table>
+
+        <h3>Return Value</h3>
+
+        <table>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+
+          <tr>
+            <td>hashedToken</td>
+            <td>string</td>
+            <td>The hashed token usable for safe storage in the database.</td>
+          </tr>
+        </table>
+
+        <h3>Implementation Details</h3>
+
+<pre><code>
+function hashToken(token) {
+    return crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex')
+}
+</code></pre>
+
+        <p>
+        The <code>hashToken()</code> makes use of the <code>crypto</code> module's
+        SHA-256 hash function to securely store the generated tokens in the database.
+        </p>
+
+        <p>
+          <strong>Note:</strong> this function is being exported because <a href="message.html">message.js</a>
+          will need to make use of it when storing its own token information.
+        </p>
+
+      </section>
+
+      <section class="section">
 
         <h2>createToken()</h2>
 
@@ -102,9 +170,10 @@
 <pre><code>
 async function createToken() {
     const tokenString = generateToken()
-    
+    const hashedToken = hashToken(tokenString)
+
     const token = new Token({
-        token: tokenString
+        token: hashedToken
     })
 
     await token.save()
@@ -114,8 +183,13 @@ async function createToken() {
 
         <p>
         The <code>createToken()</code> function must be async because it calls the (async) <code>save()</code> 
-        function on the new <code>token</code>. Notice, only the <code>tokenString</code> is returned, not the <code>Token</code>
-        document itself. This is because the user only needs the text of the token string to retrieve their message.
+        function on the new <code>token</code>.
+        </p>
+
+        <p>
+        <strong>Note:</strong> the <code>hashedToken</code> is stored in the database
+        while the <code>tokenString</code> itself is returned to the user. This ensures that only the user
+        has access to the actual token.
         </p>
 
       </section>
@@ -127,6 +201,84 @@ async function createToken() {
         <p>
         Determines whether a token provided by a user is valid.
         </p>
+
+        <h3>Parameters</h3>
+
+        <table>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+
+          <tr>
+            <td>providedToken</td>
+            <td>string</td>
+            <td>The token provided by the user in the link.</td>
+          </tr>
+        </table>
+
+        <h3>Return Value</h3>
+
+        <table>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+
+          <tr>
+            <td>success</td>
+            <td>boolean</td>
+            <td>
+              Indicates whether the token validation succeeds.
+            </td>
+          </tr>
+
+          <tr>
+            <td>token</td>
+            <td>object | null</td>
+            <td>
+              The validated token object from the database if validation succeeds. 
+              Null if validation fails.
+            </td>
+          </tr>
+
+          <tr>
+            <td>error</td>
+            <td>string | null</td>
+            <td>
+              Error message describing why validation failed. Null if validation succeeds.
+            </td>
+          </tr>
+
+          <tr>
+            <td>name</td>
+            <td>null</td>
+            <td>
+              This will only return if validation fails.
+              Always null in the standardized error response to maintain consistent API shape.
+            </td>
+          </tr>
+
+          <tr>
+            <td>email</td>
+            <td>null</td>
+            <td>
+              This will only return if validation fails.
+              Always null in the standardized error response to maintain consistent API shape.
+            </td>
+          </tr>
+
+          <tr>
+            <td>message</td>
+            <td>null</td>
+            <td>
+              This will only return if validation fails.
+              Always null in the standardized error response to maintain consistent API shape.
+            </td>
+          </tr>
+        </table>
 
         <h3>Validation Steps</h3>
 
@@ -140,6 +292,7 @@ async function createToken() {
         <h3>Implementation Details</h3>
 
 <pre><code>
+const hashedToken = hashToken(providedToken)
 let actualToken
 
 try {
@@ -150,32 +303,29 @@ try {
 </code></pre>
 
         <p>
-        The function first attempts to find the token in the database.
-        If the database query fails, a standardized error response is returned.
+        The function first attempts to find the token in the database (which
+        must be checked using a hashed version of the token since the hash is
+        what is actually in the database). If the database query fails, a 
+        standardized error response is returned. Otherwise, the
+        token is stored in the <code>actualToken</code> variable. 
         </p>
 
 <pre><code>
 if (!actualToken)
     return tokenError("This link could not be found.")
 
+const ageInMs = Date.now() - actualToken.createdAt
+if (ageInMs > TOKEN_EXPIRATION_MS)
+    return tokenError("This link has expired.")
+
 if (actualToken.used)
     return tokenError("This link has already been used.")
 </code></pre>
 
         <p>
-        If the token cannot be found or has already been used once, validation
-        fails and an appropriate error message is returned.
-        </p>
-
-<pre><code>
-const ageInMs = Date.now() - actualToken.createdAt
-if (ageInMs > TOKEN_EXPIRATION_MS)
-    return tokenError("This link has expired.")
-</code></pre>
-
-        <p>
-        Whether the token has reached its 24-hour expiration date is calculated by comparing the
-        token's creation time to the current system time.
+        If the token cannot be found, has expired 
+        (<code>const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000</code>, i.e. 24 hours) 
+        or has already been used once, validation fails and an appropriate error message is returned.
         </p>
 
 <pre><code>

@@ -13,37 +13,6 @@ const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000 // 24 hours
  */
 function generateToken() {
     return crypto.randomBytes(32).toString('hex') 
-
-    // HASH THIS //
-
-}
-
-/**
- * Creates a token object (according to the tokenSchema in 
- * tokenModel.js) and stores it in a database.
- * 
- *
- * This function creates a token, stores it in the Token collection, 
- * and then returns the token string so it can be used in a message.
- * 
- * This function is async because the.save() function 
- * on a Mongoose Schema object such as Token is an asynchronous 
- * process, i.e. it must be waited upon before the program can 
- * continue.
- *
- * @async
- * @function createToken
- * @returns {string} - The generated token string.
- */
-async function createToken() {
-    const tokenString = generateToken()
-    
-    const token = new Token({
-        token: tokenString
-    })
-
-    await token.save()
-    return tokenString
 }
 
 /**
@@ -68,6 +37,54 @@ function tokenError(errorMessage) {
 }
 
 /**
+ * Hashes a token using SHA-256.
+ *
+ * This ensures the raw token is never stored in the database.
+ *
+ * @function hashToken
+ * @param {string} token - The raw token string.
+ * @returns {string} - The hashed token.
+ */
+function hashToken(token) {
+    return crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex')
+}
+
+/**
+ * Creates a token object (according to the tokenSchema in 
+ * tokenModel.js) and stores it in a database.
+ * 
+ *
+ * This function creates a token, stores it in the Token collection, 
+ * and then returns the token string so it can be used in a message.
+ * 
+ * This function is async because the.save() function 
+ * on a Mongoose Schema object such as Token is an asynchronous 
+ * process, i.e. it must be waited upon before the program can 
+ * continue.
+ *
+ * @async
+ * @function createToken
+ * @returns {string} - The generated token string.
+ */
+async function createToken() {
+    const tokenString = generateToken()
+    const hashedToken = hashToken(tokenString)
+
+    const token = new Token({
+        // store the hashed token in the database
+        token: hashedToken
+    })
+
+    await token.save()
+    // return the actual token string to the user so it can
+    // be passed along for one-time use
+    return tokenString
+}
+
+/**
  * Determines whether a provided token is valid.
  *
  * Validation steps:
@@ -88,10 +105,12 @@ function tokenError(errorMessage) {
  * - validated token object if validation succeeds.
  */
 async function validateToken(providedToken) {
-    // get the actual token
+    // hash the provided token to compare with database
+    const hashedToken = hashToken(providedToken)
+    // get the actual token from  the database
     let actualToken
     try {
-        actualToken = await Token.findOne({ token: providedToken })
+        actualToken = await Token.findOne({ token: hashedToken })
     } catch (err) {
         return tokenError(err.message)
     }
@@ -100,14 +119,14 @@ async function validateToken(providedToken) {
     if (!actualToken)
         return tokenError("This link could not be found.")
 
-    // if the token has already been used
-    if (actualToken.used)
-        return tokenError("This link has already been used.")
-
     // if the token has expired (after 24 hours)
     const ageInMs = Date.now() - actualToken.createdAt
     if (ageInMs > TOKEN_EXPIRATION_MS) 
         return tokenError("This link has expired.")
+
+    // if the token has already been used
+    if (actualToken.used)
+        return tokenError("This link has already been used.")
 
     // if none of the errors obtain, mark token as used
     actualToken.used = true
@@ -123,4 +142,6 @@ async function validateToken(providedToken) {
     }
 }
 
-module.exports = { createToken, validateToken }
+// we want to export hashToken because we need to use it in message.js
+// when storing a Message's token in the database
+module.exports = { hashToken, createToken, validateToken }

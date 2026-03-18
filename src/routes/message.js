@@ -1,18 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const { createToken, validateToken } = require('../helpers/tokenHelpers')
+const { hashToken, createToken, validateToken } = require('../helpers/tokenHelpers')
 const Message = require('../models/messageModel')
 const Token = require('../models/tokenModel')
-
-// Getting all
-router.get('/', async (req, res) => {
-    try {
-        const messages = await Message.find()
-        res.json(messages)
-    } catch (err) {
-        res.status(500).json({ message: err.message })
-    }
-})
 
 /**
  * GET /:token
@@ -106,7 +96,7 @@ router.post('/', async (req, res) => {
         name: req.body.name,
         email: req.body.email,
         message: req.body.message,
-        token
+        token: hashToken(token)
     })
 
     // wrap in a try-catch because the .save() method is async

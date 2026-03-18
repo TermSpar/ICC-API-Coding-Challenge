@@ -27,6 +27,12 @@ body {
     font-size: 1.6em;
 }
 
+.sidebar h3 {
+    color: #ecf0f1;
+    margin-bottom: 10px;
+    font-size: 1em;
+}
+
 .sidebar a {
     display: block;
     color: #bdc3c7;

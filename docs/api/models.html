@@ -150,7 +150,7 @@ module.exports = mongoose.model('Message', messageSchema)
 </code></pre>
 
     <p>
-    <b>Note:</b> The <code>name</code>, <code>email</code>, and <code>message</code> fields 
+    <strong>Note:</strong> the <code>name</code>, <code>email</code>, and <code>message</code> fields 
     are the only ones <code>required</code> because their content is provided by the user.
     The <code>success</code>, <code>error</code>, and <code>token</code> fields will
     be populated by the API itself and so their requirement need not be enforced.
@@ -226,7 +226,7 @@ module.exports = mongoose.model('Token', tokenSchema)
 </code></pre>
 
     <p>
-    <b>Note:</b> The expiration logic for tokens is handled in the
+    <strong>Note:</strong> the expiration logic for tokens is handled in the
     <a href="../api/token-helpers.html">tokenHelpers.js</a> module 
     rather than in the schema. This is because using <code>expires</code>
     would delete the object from the database, which would prevent
