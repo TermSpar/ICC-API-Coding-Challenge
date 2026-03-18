@@ -126,7 +126,7 @@ Response (400 Bad Request)
 # Documentation
 Full documentation is available on **Github Pages**:
 
-https://termspar.github.io/ICC-API-Coding-Challenge/
+https://termspar.github.io/ICC-API-Coding-Challenge/index.html
 
 It can also be viewed locally by opening the following in your browser:
 ```
