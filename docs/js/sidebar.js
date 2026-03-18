@@ -12,6 +12,16 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(response => response.text())
     .then(html => {
       placeholder.innerHTML = html;
+
+      // Auto-highlight current page
+      const currentPath = window.location.pathname.split('/').pop(); // get filename
+      const links = placeholder.querySelectorAll('a');
+      links.forEach(link => {
+        const linkPath = link.getAttribute('href').split('/').pop();
+        if (linkPath === currentPath) {
+          link.classList.add('active');
+        }
+      });
     })
     .catch(err => console.error('Sidebar failed to load:', err));
 });
