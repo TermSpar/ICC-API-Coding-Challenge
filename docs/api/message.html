@@ -160,6 +160,22 @@ res.status(201).json({
                 returned along with a true success flag and a false error flag.
             </p>
 
+            <pre><code>
+.all((req, res) => {
+      res.status(405).json({
+          success: false,
+          error: `${req.method} not allowed on this link`,
+          name: null,
+          email: null,
+          message: null
+      })
+    })
+            </code></pre>
+
+            <p>
+            This simply blocks any unsupported HTTP methods and returns an
+            error status 405 to indicate an invalid method.
+            </p>
 
             <h3>Example Request</h3>
 
@@ -183,9 +199,10 @@ GET http://localhost:3000/message/eae18dc7e99990845817023567d7cdf03e50fbabb28c5c
             <h3>Status Codes</h3>
 
             <ul>
-                <li><code>200</code> – Message retrieved successfully</li>
-                <li><code>400</code> – Invalid or expired token</li>
-                <li><code>500</code> – Server error while retrieving the message</li>
+                <li><code>200</code> – Message retrieved successfully.</li>
+                <li><code>400</code> – Invalid or expired token.</li>
+                <li><code>405</code> – Unsupported HTTP method.</li>
+                <li><code>500</code> – Server error while retrieving the message.</li>
             </ul>
 
         </section>
@@ -318,6 +335,23 @@ try {
                 <code>token</code> string.
             </p>
 
+            <pre><code>
+.all((req, res) => {
+      res.status(405).json({
+          success: false,
+          error: `${req.method} not allowed on this link`,
+          name: null,
+          email: null,
+          message: null
+      })
+    })
+            </code></pre>
+
+            <p>
+            This simply blocks any unsupported HTTP methods and returns an
+            error status 405 to indicate an invalid method.
+            </p>
+
             <h3>Example Request</h3>
 
             <pre><code>
@@ -346,6 +380,7 @@ Content-Type: application/json
             <ul>
                 <li><code>201</code> – Message successfully created</li>
                 <li><code>400</code> – Invalid request data</li>
+                <li><code>405</code> – Unsupported HTTP method.</li>
                 <li><code>500</code> – Server error while generating token</li>
             </ul>
 
