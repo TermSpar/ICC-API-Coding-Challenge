@@ -32,7 +32,7 @@ app.use(express.json())
 const messageRouter = require('./src/routes/message')
 app.use('/message', messageRouter)
 
-// Catch 404 exception
+// Catch 404 exception (for bad routes)
 app.use((req, res) => {
   res.status(404).json({
     success: false,

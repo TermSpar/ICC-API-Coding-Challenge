@@ -66,49 +66,52 @@
       <tr>
         <th>Field</th>
         <th>Type</th>
-        <th>Required</th>
+        <th>Validations</th>
         <th>Description</th>
       </tr>
 
       <tr>
         <td>success</td>
         <td>Boolean</td>
-        <td>No</td>
+        <td>None</td>
         <td>Indicates whether the message was successfully created.</td>
       </tr>
 
       <tr>
         <td>error</td>
         <td>String</td>
-        <td>No</td>
+        <td>None</td>
         <td>Provides any error message.</td>
       </tr>
 
       <tr>
         <td>name</td>
         <td>String</td>
-        <td>Yes</td>
+        <td>Required<br> Max length: 100 characters.</td>
         <td>Name attached to the message.</td>
       </tr>
 
       <tr>
         <td>email</td>
         <td>String</td>
-        <td>Yes</td>
+        <td>Required<br> 
+        Max length: 100 characters<br> 
+        Format: valid email (e.g. ben@example.com).</td>
         <td>Email address attached to the message.</td>
       </tr>
 
       <tr>
         <td>message</td>
         <td>String</td>
-        <td>Yes</td>
+        <td>Required<br>
+        Max length: 250 characters.</td>
         <td>The message content itself.</td>
       </tr>
 
       <tr>
         <td>token</td>
         <td>String</td>
-        <td>No</td>
+        <td>None</td>
         <td>One-time token string associated with the message.</td>
       </tr>
 
@@ -128,16 +131,22 @@ const messageSchema = new mongoose.Schema({
     },
     name: {
         type: String,
-        required: true
+        required: [true, "Name is required"],
+        maxlength: [100, "Name cannot exceed 100 characters"]
     },
     email: {
         type: String,
-        required: true
+        required: [true, "Email is required"],
+        match: [
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            'Please use a valid email address (e.g. ben@example.com)'
+        ],
+        maxlength: [100, "Email cannot exceed 100 characters"]
     },
     message: {
         type: String,
-        required: true,
-        maxlength: 250
+        required: [true, "Message is required"],
+        maxlength: [250, "Message cannot exceed 250 characters"]
     },
     token: {
         type: String,

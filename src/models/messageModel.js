@@ -38,7 +38,8 @@ const messageSchema = new mongoose.Schema({
      */
     name: {
         type: String,
-        required: true
+        required: [true, "Name is required"],
+        maxlength: [100, "Name cannot exceed 100 characters"]
     },
     /**
      * Email attached to the message.
@@ -47,7 +48,12 @@ const messageSchema = new mongoose.Schema({
      */
     email: {
         type: String,
-        required: true
+        required: [true, "Email is required"],
+        match: [
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            'Please use a valid email address (e.g. ben@example.com)'
+        ],
+        maxlength: [100, "Email cannot exceed 100 characters"]
     },
     /**
      * The message.
@@ -56,8 +62,8 @@ const messageSchema = new mongoose.Schema({
      */
     message: {
         type: String,
-        required: true,
-        maxlength: 250
+        required: [true, "Message is required"],
+        maxlength: [250, "Message cannot exceed 250 characters"]
     },
     /**
      * Token attached to the message.

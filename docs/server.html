@@ -100,6 +100,7 @@ app.use(express.json())
 
         <p>
             The server uses the <code>messageRouter</code> for all routes prefixed with <code>/message</code>.
+            Any route other than <code>/message</code> will returned as a 404 error.
         </p>
 
         <h3>Implementation</h3>
@@ -107,6 +108,14 @@ app.use(express.json())
 <pre><code>
 const messageRouter = require('./src/routes/message')
 app.use('/message', messageRouter)
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: `Route '${req.originalUrl}' not found`,
+    suggestion: "Try '/message'"
+  })
+})
 </code></pre>
 
     </section>
