@@ -70,15 +70,18 @@ app.use(express.json())
 app.use('/message', router)
 
 /** 
-  Message API tests
+* Message API tests
 **/
 describe('Message API', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
+  /** 
+  * POST tests
+  **/
   describe('POST /message', () => {
-    it('should create a message successfully, provide proper response', async () => {
+    it('should create a message successfully given valid input', async () => {
       // Mock the async functions
       createToken.mockResolvedValue('bens-token')
       saveMessageMock.mockResolvedValue(true)
@@ -89,8 +92,8 @@ describe('Message API', () => {
         .set('Content-Type', 'application/json')
         .send({
           name: 'Ben',
-          email: 'ben@example.com',
-          message: 'Hello world'
+          email: 'ben@test.com',
+          message: 'This is Ben\'s test message... hi!'
         })
 
       // Successful creation status
@@ -107,19 +110,62 @@ describe('Message API', () => {
       expect(hashToken).toHaveBeenCalledWith('bens-token')
       expect(saveMessageMock).toHaveBeenCalled()
     })
+
+    it('should return error status 500 if token creation fails', async () => {
+      // Mock a token creation failure
+      createToken.mockRejectedValue(new Error('Token creation failed'))
+
+      // POST it
+      const res = await request(app)
+        .post('/message')
+        .send({
+          name: 'Ben',
+          email: 'ben@test.com',
+          message: 'This is Ben\'s test message... hi!'
+        })
+
+      // Ensure the correct 500 error status is returned
+      expect(res.status).toBe(500)
+      // Ensure the success and token fields are there, but null
+      expect(res.body.success).toBe(false)
+      expect(res.body.token).toBeNull()
+    })
+
+    it('should return error status 400 if token save fails', async () => {
+      // Mock successful token creation, but failed message save
+      createToken.mockResolvedValue('bens-token')
+      saveMessageMock.mockRejectedValue(new Error('Token save failed'))
+
+      const res = await request(app)
+        .post('/message')
+        .send({
+          name: 'Ben',
+          email: 'ben@test.com',
+          message: 'This is Ben\'s test message... hi!'
+        })
+
+      // Ensure the correct 400 error status is returned
+      expect(res.status).toBe(400)
+      // Ensure the success and token fields are there, but null
+      expect(res.body.success).toBe(false)
+      expect(res.body.token).toBeNull()
+    })
   })
 
+  /** 
+  * GET tests
+  **/
   describe('GET /message:token', () => {
-    it('should successfully retrieve email, name, and message from a given token', async () => {
+    it('should successfully retrieve email, name, and message from a valid token', async () => {
       // Mock the async functions
       validateToken.mockResolvedValue({
         success: true,
-        token: { token: "bens-hashed-token" }
+        token: { token: 'bens-hashed-token' }
       })
       findOneMessageMock.mockResolvedValue({
-        name: "Ben",
-        email: "ben@test.com",
-        message: "This is Ben's message... hi!"
+        name: 'Ben',
+        email: 'ben@test.com',
+        message: 'This is Ben\'s test message... hi!'
       })
 
       // Send a GET request
@@ -132,10 +178,33 @@ describe('Message API', () => {
       expect(res.body).toEqual({
         success: true,
         error: null,
-        name: "Ben",
-        email: "ben@test.com",
-        message: "This is Ben's message... hi!" 
+        name: 'Ben',
+        email: 'ben@test.com',
+        message: 'This is Ben\'s test message... hi!' 
       })
+    })
+  })
+
+  /** 
+  * Unsupported methods tests
+  **/
+  describe('Unsupported methods', () => {
+    it('should return 405 for PUT on /message', async () => {
+      // Attempt a PUT request
+      const res = await request(app).put('/message')
+
+      // Expect error status 405
+      expect(res.status).toBe(405)
+      expect(res.body.success).toBe(false)
+    })
+
+    it('should return 405 for DELETE on /message/:token', async () => {
+      // Attempt a DELETE request
+      const res = await request(app).delete('/message/bens-token')
+
+      // Expect error status 405
+      expect(res.status).toBe(405)
+      expect(res.body.success).toBe(false)
     })
   })
 })
