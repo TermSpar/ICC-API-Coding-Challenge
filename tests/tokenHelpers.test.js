@@ -163,7 +163,7 @@ describe('Token Helpers', () => {
 
       findOneMock.mockResolvedValue(tokenObj)
 
-      const res = await validateToken('validtoken')
+      const res = await validateToken('bens-valid-token')
 
       expect(res.success).toBe(false)
       expect(res.error).toBe('Save failed')
