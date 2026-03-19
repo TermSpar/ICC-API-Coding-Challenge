@@ -135,6 +135,13 @@ Response (400 Bad Request)
     "message": null
 }
 ```
+# Testing
+This application uses **Jest** for unit testing.  
+
+There is currently **partial test coverage** for `message.js` and `tokenHelpers.js`. These tests can be run with the following command:
+```
+npm test
+```
 # Documentation
 Full documentation is available on **Github Pages**:
 
