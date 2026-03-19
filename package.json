@@ -22,7 +22,7 @@
     "supertest": "^7.2.2"
   },
   "overrides": {
-    "glob": "^10.3.10",
+    "glob": "^13.0.4",
     "inflight": "npm:lru-cache@latest"
   }
 }
