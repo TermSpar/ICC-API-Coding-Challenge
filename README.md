@@ -7,9 +7,14 @@ ICC API Coding Challenge
 │
 ├── docs/                     # Static API documentation site
 │   │
-│   ├── api/                  # API documentation pages
-│   ├── css/                  # Documentation css
-│   └── index.html            # Documentation homepage
+│   ├── css/                  # Documentation CSS
+│   ├── includes/             # Shared HTML includes (e.g., sidebar)
+│   ├── js/                   # Documentation JavaScript
+│   ├── index.html            # Documentation homepage
+│   ├── message.html          # Message API docs
+│   ├── models.html           # Database models docs
+│   ├── server.html           # Server setup docs
+│   └── token-helpers.html    # Token helpers docs
 │
 ├── node_modules/             # Installed npm dependencies (not here by default, read below).
 │
@@ -44,14 +49,14 @@ npm install
 # Environment Variables (Optional)
 If you would like to override the sever and database connection variables (e.g. DB_HOST, SERVER_HOST, etc.)
 you can do so in your own `.env` file. Otherwise, these default values will be used:
-```
-| Variable      | Default Value      | Description                            |
-|---------------|--------------------|----------------------------------------|
-| DB_HOST       | localhost          | MongoDB host                           |
-| DB_NAME       | bollinger-test     | MongoDB database name                  |
-| SERVER_HOST   | localhost          | Host for Express server                |
-| SERVER_PORT   | 3000               | Port for Express server                |
-```
+
+| Variable    | Default Value  | Description                     |
+|------------|---------------|---------------------------------|
+| DB_HOST     | localhost     | MongoDB host                   |
+| DB_NAME     | bollinger-test| MongoDB database name          |
+| SERVER_HOST | localhost     | Host for Express server        |
+| SERVER_PORT | 3000          | Port for Express server        |
+
 # Running the API
 **Start the server**:
 ```
@@ -75,7 +80,14 @@ Connected to Database: bollinger-test at localhost
 # Using the API Endpoints
 Once the server is running and connected to the database, you can use the API through a service such as [Postman](https://www.postman.com/downloads/).  
   
-First, you will want to create a `Message` via a POST request to `http://SERVER_HOST:SERVER_PORT/message`. It should contain string data for the `name`, `email`, and `message` fields. For example:  
+First, you will want to create a `Message` via a POST request to `http://SERVER_HOST:SERVER_PORT/message`. It should contain string data for the `name`, `email`, and `message` fields. These fields must pass the following **validations:**
+| Field   | Validations |
+|--------|------------|
+| name   | Required; max length 100 characters |
+| email  | Required; max length 100 characters; must be a valid email format (e.g. `ben@example.com`) |
+| message| Required; max length 250 characters |
+  
+For example:  
   
 **POST** `http://localhost:3000/message`  
 Request Body (JSON)
