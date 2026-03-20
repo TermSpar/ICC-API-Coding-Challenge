@@ -3,12 +3,7 @@ const router = express.Router()
 const { hashToken, createToken, validateToken } = require('../services/tokenServices')
 const Message = require('../models/messageModel')
 const asyncHandler = require('../helpers/asyncHandler')
-const HttpError = require('../helpers/HttpError')
 const { formatGETError, formatPOSTError, formatSuccessMessage } = require('../helpers/responseHelpers')
-
-function isValidTokenFormat(token) {
-  return /^[a-f0-9]{64}$/.test(token)
-}
 
 /**
  * GET /:token

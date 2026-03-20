@@ -13,15 +13,17 @@ ICC API Coding Challenge
 │   ├── message.html          # Message API docs
 │   ├── models.html           # Database models docs
 │   ├── server.html           # Server setup docs
-│   └── token-helpers.html    # Token helpers docs
+│   ├── helpers.html          # Helper utilities docs
+│   └── token-services.html    # Token helper/services docs
 │
-├── node_modules/             # Installed npm dependencies (not here by default, read below).
+├── node_modules/             # Installed npm dependencies (not included in repo)
 │
 ├── src/                      # Application source code
 │   │
 │   ├── helpers/              # Helper functions
-│   ├── models/               # MongooseDB schemas
+│   ├── models/               # Mongoose schemas
 │   ├── routes/               # Express API route definitions
+│   └── services/             # Business logic / service layer
 │
 ├── tests/                    # Unit tests
 │
