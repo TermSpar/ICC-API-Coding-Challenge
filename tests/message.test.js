@@ -4,8 +4,8 @@
  * Mocked services
  */
 
-// Mock token helpers
-jest.mock('../src/services/tokenHelpers', () => ({
+// Mock token services
+jest.mock('../src/services/tokenServices', () => ({
   hashToken: jest.fn((t) => `hashed-${t}`),
   createToken: jest.fn(),
   validateToken: jest.fn()
@@ -54,7 +54,7 @@ jest.mock('../src/models/tokenModel', () => {
 // Imports after mocks
 const request = require('supertest')
 
-const { hashToken, createToken, validateToken } = require('../src/services/tokenHelpers')
+const { hashToken, createToken, validateToken } = require('../src/services/tokenServices')
 const Message = require('../src/models/messageModel')
 
 // Extract mocks

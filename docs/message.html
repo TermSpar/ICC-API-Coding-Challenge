@@ -150,7 +150,7 @@ const token = await createToken()
 
                 <p>
                     Calls the (async) <code>createToken()</code> function from
-                    <a href="token-helper.html">tokenHelpers.js</a>, which generates
+                    <a href="token-helper.html">tokenServices.js</a>, which generates
                     a one-time token with a 24-hour expiration period.
                     This token is put in the MongoDB.
                 </p>
@@ -302,7 +302,7 @@ const validToken = await validateToken(providedToken)
                 </code></pre>
                 <p>
                     Calls the (async) <code>validateToken()</code> function from
-                    <a href="../api/token-helpers.html">tokenHelpers.js</a>,
+                    <a href="../api/token-services.html">tokenServices.js</a>,
                     which will make the token accessible as
                     <code>validToken.token</code> if it exists.
                 </p>

@@ -230,7 +230,7 @@ module.exports = mongoose.model('Token', tokenSchema)
 
     <p>
     <strong>Note:</strong> the expiration logic for tokens is handled in the
-    <a href="../api/token-helpers.html">tokenHelpers.js</a> module 
+    <a href="../api/token-services.html">tokenServices.js</a> module 
     rather than in the schema. This is because using <code>expires</code>
     would delete the object from the database, which would prevent
     informing the user that the token, in fact, expired.

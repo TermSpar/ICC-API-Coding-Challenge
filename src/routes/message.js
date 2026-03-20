@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { hashToken, createToken, validateToken } = require('../services/tokenHelpers')
+const { hashToken, createToken, validateToken } = require('../services/tokenServices')
 const Message = require('../models/messageModel')
 const asyncHandler = require('../helpers/asyncHandler')
 const HttpError = require('../helpers/HttpError')

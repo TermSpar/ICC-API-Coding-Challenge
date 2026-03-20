@@ -26,7 +26,7 @@ const tokenSchema = new mongoose.Schema({
     },
     /**
      * Date at which the token was created, to ensure that
-     * it expires after 24-hours (handled in tokenHelpers.js).
+     * it expires after 24-hours (handled in tokenServices.js).
      * @type {Date}
      * @default Date.now
      */

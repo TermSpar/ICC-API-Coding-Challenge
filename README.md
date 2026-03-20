@@ -138,7 +138,7 @@ For all of the possible error status codes, see the [Message API documentation](
 # Testing
 This application uses **Jest** for unit testing.  
 
-There is currently **partial test coverage** for `message.js` and `tokenHelpers.js`. These tests can be run with the following command (make sure you are in the project's root directory):
+There is currently **partial test coverage** for `message.js` and `tokenServices.js`. These tests can be run with the following command (make sure you are in the project's root directory):
 ```
 npm test
 ```

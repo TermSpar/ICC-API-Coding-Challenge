@@ -1,4 +1,4 @@
-// tests/tokenHelpers.test.js
+// tests/tokenServices.test.js
 
 /**
  * Mocked services
@@ -30,7 +30,7 @@ const {
   hashToken,
   createToken,
   validateToken
-} = require('../src/services/tokenHelpers')
+} = require('../src/services/tokenServices')
 
 const { saveTokenMock, findOneMock } = Token.__mocks__
 
