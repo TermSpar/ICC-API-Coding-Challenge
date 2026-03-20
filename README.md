@@ -57,7 +57,7 @@ you can do so in your own `.env` file. Otherwise, these default values will be u
 | SERVER_PORT | 3000          | Port for Express server        |
 
 # Running the API
-**Start the server**:
+**Start the server** (make sure you are in the project's root directory):
 ```
 npm start
 ```
@@ -137,7 +137,7 @@ Response (400 Bad Request)
 # Testing
 This application uses **Jest** for unit testing.  
 
-There is currently **partial test coverage** for `message.js` and `tokenHelpers.js`. These tests can be run with the following command:
+There is currently **partial test coverage** for `message.js` and `tokenHelpers.js`. These tests can be run with the following command (make sure you are in the project's root directory):
 ```
 npm test
 ```
