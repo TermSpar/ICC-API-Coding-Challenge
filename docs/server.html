@@ -22,10 +22,9 @@
 
     </section>
 
-    <!-- Table of Contents -->
     <section class="section">
 
-        <h2>Table of Contents</h2>
+        <h2>Server Components</h2>
 
         <table>
             <tr>
@@ -99,10 +98,10 @@
         <h2>Application Initialization & Database Connection</h2>
 
         <p>
-            The Express application is created and configured with middleware and routes.
-            The MongoDB connection is established using Mongoose only when the application
+            The Express <code>app</code> is created and configured with middleware and routes.
+            The MongoDB connection is established using Mongoose only when the <code>app</code>
             is executed directly (not when imported). This prevents unintended database
-            connections during testing and allows the app to be reused in test environments.
+            connections during testing and allows the <code>app</code> to be reused in test environments.
         </p>
 
         <h3>Implementation</h3>
@@ -136,8 +135,14 @@ if (require.main === module) {
 
         <p>
             Express middleware is used to parse incoming JSON payloads and handle both request-level
-            and application-level errors. This includes handling malformed JSON, routing errors,
-            and centralized global error handling.
+            and application-level errors. This includes handling invalid JSON, routing errors,
+            as well centralized global error handling.
+        </p>
+
+        <p>
+            Since the API's routes are wrapped by the <code>asyncHandler()</code> (read about that
+            on the <a href="helpers.html#async-handler">Additional Helper Functions</a> page), all thrown errors
+            will be caught here.
         </p>
 
         <h3>JSON Parsing Middleware</h3>
@@ -189,6 +194,11 @@ app.use((err, req, res, next) => {
 })
 </code></pre>
 
+    <p>
+        <strong>Note: </strong> A distinction is made between POST and GET requests
+        since their error formats must be different. Additionally, validation errors
+        will only ever be raised on GET requests.
+    </p>
     </section>
 
     <section class="section" id="routes">
@@ -239,21 +249,13 @@ app.listen(SERVER_PORT, SERVER_HOST, () =>
         <h2>Testing</h2>
 
         <p>
-            The Express <code>app</code> is exported so it can be used in automated tests without
-            starting an actual server. This allows frameworks like Jest or Supertest to interact
-            directly with the application.
+            The Express <code>app</code> is exported so it can be used in the unit tests.
         </p>
 
         <p>
             Additionally, the database connection is only initialized when the application is run
             directly (<code>require.main === module</code>). This ensures that tests do not
-            unintentionally connect to MongoDB, enabling isolation and easier mocking of data
-            access layers.
-        </p>
-
-        <p>
-            When imported in tests, only the configured Express app is used, and no network
-            listener or database connection is automatically started.
+            unintentionally connect to MongoDB, allowing for easier mocking of data.
         </p>
 
 <pre><code>

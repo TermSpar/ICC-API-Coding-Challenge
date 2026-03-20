@@ -17,7 +17,7 @@
     <section class="section">
 
         <p>
-            This page documents the reusable helper utilities used across the application, including
+            Reusable helper utilities used across the application, including
             async error handling, standardized response formatting, and custom error classes.
         </p>
 
@@ -54,7 +54,8 @@
         <h2>Async Handler</h2>
 
         <p>
-            Wraps an async Express route handler and automatically forwards any errors to the global error handling middleware.
+            Wraps an async Express route handler and automatically forwards any errors to the 
+            global error handling middleware (read about that on the <a href="server.html#middleware-errors">Server Startup</a> page).
         </p>
 
         <p>
@@ -118,7 +119,8 @@ function formatGETError(message, extra = {}) {
 
         <p>
             Generates a standardized error response for a POST request. The response always includes
-            <code>success</code>, <code>error</code>, and <code>token</code> fields.
+            <code>success</code>, <code>error</code>, and <code>token</code> fields. The <code>error</code> 
+            field is null if there are no errors, and <code>token</code> is null if there are errors.
         </p>
 
 <pre><code>
@@ -135,8 +137,9 @@ function formatPOSTError(message, extra = {}) {
         <h3>Success Response</h3>
 
         <p>
-            Generates a standardized success response for retrieving a message. The response includes
-            the message's <code>name</code>, <code>email</code>, and <code>message</code> fields.
+            Generates a standardized success response for retrieving a message. Since this will
+            only be used by GET, it includes the <code>Message</code>'s <code>name</code>, <code>email</code>, 
+            and <code>message</code> fields.
         </p>
 
 <pre><code>
