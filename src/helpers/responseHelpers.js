@@ -5,7 +5,7 @@
  * so they are explicitly set to null when an error occurs. The error
  * field is also set to whatever message is specified.
  *
- * @function formatErrorMessage
+ * @function formatGETError
  * @param {string} message - Error message describing the failure.
  * @param {Object} [extra={}] - Optional additional fields to include in the response.
  * @returns {Object} - Structured error response.
@@ -26,7 +26,7 @@ function formatGETError(message, extra = {}) {
  *
  * The response must always contain success, error, and token fields.
  *
- * @function formatErrorMessage
+ * @function formatPOSTError
  * @param {string} message - Error message describing the failure.
  * @param {Object} [extra={}] - Optional additional fields to include in the response.
  * @returns {Object} - Structured error response.

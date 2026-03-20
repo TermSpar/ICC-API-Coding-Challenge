@@ -36,7 +36,9 @@ app.use(express.json())
  */
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).json(formatErrorMessage("Invalid JSON format"))
+    if (req.method == 'GET')
+      return res.status(400).json(formatGETError("Invalid JSON format"))
+    return res.status(400).json(formatPOSTError("Invalid JSON format"))
   }
   next()
 })
@@ -84,10 +86,14 @@ app.use((err, req, res, next) => {
   }
 })
 
+/**
+ * Handle invalid route errors
+ */
 app.use((req, res) => {
-  res.status(404).json(formatGETMessage(`Route '${req.originalUrl}' not found`, {
-    suggestion: "Try '/message'"
-  }))
+  if (req.method == 'GET'){
+    res.status(404).json(formatGETError(`Route '${req.originalUrl}' not found`))
+  }
+  res.status(404).json(formatPOSTError(`Route '${req.originalUrl}' not found`))
 })
 
 /**
