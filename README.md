@@ -102,7 +102,7 @@ Response (201 Created)
 {
     "success": true,
     "error": null,
-    "token": "actual-generated-token-string"
+    "token": "bens-random-token"
 }
 ```
 **Make sure you save the token.** Since it will be stored as a hashed string in the database,
@@ -110,7 +110,7 @@ there will be no other way to access this token once the response message is gon
   
 Once you have your token, you can retrieve all of the data attached to your message via a GET request to `http://SERVER_HOST:SERVER_PORT/message/:token`. For example:  
   
-**GET** `http://localhost:3000/message/actual-generated-token-string`  
+**GET** `http://localhost:3000/message/bens-random-token`  
   
 Response (200 OK)  
 ```
@@ -134,6 +134,7 @@ Response (400 Bad Request)
     "message": null
 }
 ```
+For all of the possible error status codes, see the [Message API documentation](https://termspar.github.io/ICC-API-Coding-Challenge/message.html).
 # Testing
 This application uses **Jest** for unit testing.  
 
