@@ -30,7 +30,7 @@ const {
   hashToken,
   createToken,
   validateToken
-} = require('../src/helpers/tokenHelpers')
+} = require('../src/services/tokenHelpers')
 
 const { saveTokenMock, findOneMock } = Token.__mocks__
 
@@ -89,24 +89,17 @@ describe('Token Helpers', () => {
     it('should return an error message if the token is not found', async () => {
       findOneMock.mockResolvedValue(null)
 
-      const res = await validateToken('bens-bad-token')
-
-      expect(res).toEqual({
-        success: false,
-        error: 'This link could not be found.',
-        name: null,
-        email: null,
-        message: null
-      })
+      await expect(validateToken('bens-bad-token')).rejects.toThrow(
+        'This link could not be found.'
+      )
     })
 
     it('should return an error message Token.findOne() fails', async () => {
       findOneMock.mockRejectedValue(new Error('Token.findOne() error'))
 
-      const res = await validateToken('bens-failed-token')
-
-      expect(res.success).toBe(false)
-      expect(res.error).toBe('Token.findOne() error')
+      await expect(validateToken('bens-failed-token')).rejects.toThrow(
+        'Token.findOne() error'
+      )
     })
 
     it('should return an error message if the token expired after 24 hours', async () => {
@@ -118,10 +111,9 @@ describe('Token Helpers', () => {
         used: false
       })
 
-      const res = await validateToken('bens-expired-token')
-
-      // Ensure that the token fails the 24 hour validation check
-      expect(res.error).toBe('This link has expired.')
+      await expect(validateToken('bens-expired-token')).rejects.toThrow(
+        'This link has expired.'
+      )
     })
 
     it('should return an error message if the token is already used', async () => {
@@ -130,10 +122,9 @@ describe('Token Helpers', () => {
         used: true
       })
 
-      const res = await validateToken('bens-used-token')
-
-      // Ensure that the token fails the 'used' test
-      expect(res.error).toBe('This link has already been used.')
+      await expect(validateToken('bens-used-token')).rejects.toThrow(
+        'This link has already been used.'
+      )
     })
 
     it('should validate the valid token and mark as used', async () => {
@@ -164,10 +155,9 @@ describe('Token Helpers', () => {
 
       findOneMock.mockResolvedValue(tokenObj)
 
-      const res = await validateToken('bens-valid-token')
-
-      expect(res.success).toBe(false)
-      expect(res.error).toBe('Save failed')
+      await expect(validateToken('bens-valid-token')).rejects.toThrow(
+        'Save failed'
+      )
     })
   })
 })

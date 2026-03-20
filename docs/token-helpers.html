@@ -19,6 +19,12 @@
                 The token helper module provides utility functions used by the API to generate,
                 store, and validate one-time tokens for retrieving messages.
             </p>
+
+            <p>
+                These helpers work with centralized error handling using
+                <code>HttpError</code> and a global Express error middleware. Functions
+                throw errors instead of returning structured error objects internally.
+            </p>
         </section>
 
         <section class="section">
@@ -54,10 +60,6 @@
                 <tr>
                     <td><a href="#generateToken">generateToken()</a></td>
                     <td>Generates token string.</td>
-                </tr>
-                <tr>
-                    <td><a href="#tokenError">tokenError()</a></td>
-                    <td>Generates standardized error output.</td>
                 </tr>
             </table>
         </section>
@@ -167,6 +169,12 @@ async function createToken() {
                 <strong>Note:</strong> the <code>createToken()</code> function must be async because it calls the 
                 async <code>save()</code> function on the new <code>token</code>.
             </p>
+
+            <!-- NEW -->
+            <p>
+                Errors that occur during token creation are now thrown as <code>HttpError</code> instances
+                and handled by the global error middleware rather than being returned directly.
+            </p>
         </section>
 
         <section class="section" id="validateToken">
@@ -174,6 +182,11 @@ async function createToken() {
 
             <p>
                 Determines whether a token provided by a user is valid.
+            </p>
+
+            <p>
+                This function throws <code>HttpError</code> instances
+                when validation fails instead of returning a structured error object.
             </p>
 
             <h3>Parameters</h3>
@@ -258,6 +271,31 @@ async function createToken() {
                 <li>If valid, mark the token as used.</li>
             </ol>
 
+           <h3>Errors Thrown</h3>
+
+            <table>
+                <tr>
+                    <th>Condition</th>
+                    <th>HttpError</th>
+                </tr>
+                <tr>
+                    <td>If the token is not found</td>
+                    <td><code>HttpError(400, "This link could not be found.")</code></td>
+                </tr>
+                <tr>
+                    <td>If the token has expired</td>
+                    <td><code>HttpError(400, "This link has expired.")</code></td>
+                </tr>
+                <tr>
+                    <td>If the token has already been used</td>
+                    <td><code>HttpError(400, "This link has already been used.")</code></td>
+                </tr>
+                <tr>
+                    <td>If a database error occurs</td>
+                    <td><code>HttpError(500, err.message)</code></td>
+                </tr>
+            </table>
+
             <h3>Implementation Details</h3>
             <details>
                 <summary>Click to expand</summary>
@@ -266,43 +304,36 @@ const hashedToken = hashToken(providedToken)
 let actualToken
 
 try {
-    actualToken = await Token.findOne({ token: providedToken })
+    actualToken = await Token.findOne({ token: hashedToken })
 } catch (err) {
-    return tokenError(err.message)
+    throw new HttpError(500, err.message)
 }
             </code></pre>
 
             <p>
-                The function first attempts to find the token in the database (which
-                must be checked using a hashed version of the token since the hash is
-                what is actually in the database).
+                The function first attempts to find the token in the database using the hashed version
+                of the provided token.
             </p>
 
             <p>
-                If the database query fails, a standardized error response is returned. Otherwise, the
-                token is stored in the <code>actualToken</code> variable. 
+                If the database query fails, a <code>HttpError</code> is thrown and handled by the global
+                error middleware.
             </p>
 
             <pre><code>
 if (!actualToken)
-    return tokenError("This link could not be found.")
+    throw new HttpError(400, "This link could not be found.")
 
 const ageInMs = Date.now() - actualToken.createdAt
 if (ageInMs > TOKEN_EXPIRATION_MS)
-    return tokenError("This link has expired.")
+    throw new HttpError(400, "This link has expired.")
 
 if (actualToken.used)
-    return tokenError("This link has already been used.")
+    throw new HttpError(400, "This link has already been used.")
             </code></pre>
 
             <p>
-                If the token cannot be found, has expired or has already been used once, 
-                validation fails and an appropriate error message is returned.
-            </p>
-
-            <p>
-                <strong>Note:</strong> <code>const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000</code>
-                is 24 hours.
+                If validation fails at any stage, an appropriate <code>HttpError</code> is thrown.
             </p>
 
             <pre><code>
@@ -311,13 +342,14 @@ actualToken.used = true
 try {
     await actualToken.save()
 } catch (err) {
-    return tokenError(err.message)
+    throw new HttpError(500, err.message)
 }
             </code></pre>
 
             <p>
-                If the token is valid, it is marked as used and saved back to the database to enforce the one-time use rule.
+                If the token is valid, it is marked as used and saved back to the database.
             </p>
+
             </details>
         </section>
 
@@ -344,47 +376,6 @@ function generateToken() {
             <p>
                 The use of <code>crypto.randomBytes()</code> makes sure that the token
                 cannot be easily predicted or replicated.
-            </p>
-        </section>
-
-        <section class="section" id="tokenError">
-            <h2>tokenError()</h2>
-
-            <p>
-                Generates a standardized error response when an invalid token is provided.
-            </p>
-
-            <h3>Parameters</h3>
-            <table>
-                <tr>
-                    <th>Parameter</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                </tr>
-                <tr>
-                    <td>errorMessage</td>
-                    <td>string</td>
-                    <td>The message describing why token validation failed.</td>
-                </tr>
-            </table>
-
-            <h3>Implementation</h3>
-            <pre><code>
-function tokenError(errorMessage) {
-    return {
-        success: false,
-        error: errorMessage,
-        name: null,
-        email: null,
-        message: null
-    }
-}
-            </code></pre>
-
-            <p>
-                In addition to the provided <code>errorMessage</code>, the JSON response always includes the <code>name</code>, <code>email</code>,
-                and <code>message</code> fields so that the API response format
-                remains consistent even when an error occurs.
             </p>
         </section>
 

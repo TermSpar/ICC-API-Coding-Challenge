@@ -17,12 +17,50 @@
     <section class="section">
 
         <p>
-            Setup for the Node.js server, its routes, and connection to the MongoDB.
+            Setup for the Node.js server, its routes, MongoDB connection, middleware, error handling, and testing configuration.
         </p>
 
     </section>
 
+    <!-- Table of Contents -->
     <section class="section">
+
+        <h2>Table of Contents</h2>
+
+        <table>
+            <tr>
+                <th>Section</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><a href="#env">Environment Variables</a></td>
+                <td>Configuration values for database and server.</td>
+            </tr>
+            <tr>
+                <td><a href="#init-db">Application Initialization & Database Connection</a></td>
+                <td>Express setup and MongoDB connection.</td>
+            </tr>
+            <tr>
+                <td><a href="#middleware-errors">Middleware & Error Handling</a></td>
+                <td>JSON parsing, request validation, and global error handling.</td>
+            </tr>
+            <tr>
+                <td><a href="#routes">Routes</a></td>
+                <td>Route registration and 404 handling.</td>
+            </tr>
+            <tr>
+                <td><a href="#startup">Server Startup</a></td>
+                <td>Starting the HTTP server.</td>
+            </tr>
+            <tr>
+                <td><a href="#testing">Testing</a></td>
+                <td>Exporting the app and test-friendly database initialization.</td>
+            </tr>
+        </table>
+
+    </section>
+
+    <section class="section" id="env">
 
         <h2>Environment Variables</h2>
 
@@ -56,51 +94,110 @@
 
     </section>
 
-    <section class="section">
+    <section class="section" id="init-db">
 
-        <h2>MongoDB Connection</h2>
+        <h2>Application Initialization & Database Connection</h2>
 
         <p>
-            The server connects to MongoDB using Mongoose. The connection URI is constructed from
-            environment variables (with defaults).
+            The Express application is created and configured with middleware and routes.
+            The MongoDB connection is established using Mongoose only when the application
+            is executed directly (not when imported). This prevents unintended database
+            connections during testing and allows the app to be reused in test environments.
         </p>
 
         <h3>Implementation</h3>
 
 <pre><code>
-const mongoURI = `mongodb://${DB_HOST}/${DB_NAME}`
-mongoose.connect(mongoURI)
-const db = mongoose.connection
+require('dotenv').config()
+const express = require('express')
+const app = express()
+const mongoose = require('mongoose')
 
-db.on('error', (error) => console.error('Database connection error:', error))
-db.once('open', () => console.log(`Connected to Database: ${DB_NAME} at ${DB_HOST}`))
+const DB_HOST = process.env.DB_HOST || 'localhost'
+const DB_NAME = process.env.DB_NAME || 'bollinger-test'
+const SERVER_HOST = process.env.SERVER_HOST || 'localhost'
+const SERVER_PORT = process.env.SERVER_PORT || 3000
+
+if (require.main === module) {
+  const mongoURI = `mongodb://${DB_HOST}/${DB_NAME}`
+  mongoose.connect(mongoURI)
+  const db = mongoose.connection
+
+  db.on('error', (error) => console.error('Database connection error:', error))
+  db.once('open', () => console.log(`Connected to Database: ${DB_NAME} at ${DB_HOST}`))
+}
 </code></pre>
 
     </section>
 
-    <section class="section">
+    <section class="section" id="middleware-errors">
 
-        <h2>Middleware</h2>
+        <h2>Middleware & Error Handling</h2>
 
         <p>
-            Express.js middleware is used to parse incoming JSON payloads.
+            Express middleware is used to parse incoming JSON payloads and handle both request-level
+            and application-level errors. This includes handling malformed JSON, routing errors,
+            and centralized global error handling.
         </p>
 
-        <h3>Implementation</h3>
+        <h3>JSON Parsing Middleware</h3>
 
 <pre><code>
 app.use(express.json())
 </code></pre>
 
+        <h3>JSON Syntax Error Handling</h3>
+
+<pre><code>
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json(formatErrorMessage("Invalid JSON format"))
+  }
+  next()
+})
+</code></pre>
+
+        <h3>Global Error Handler</h3>
+
+<pre><code>
+app.use((err, req, res, next) => {
+  console.error(err)
+
+  if (req.method == "GET") {
+    if (err instanceof HttpError) {
+      return res.status(err.statusCode).json(formatGETError(err.message))
+    }
+
+    if (err.name === 'ValidationError') {
+      return res.status(400).json(
+        formatGETError(err.message || "Internal Server Error", {
+          token: null
+        })
+      )
+    }
+
+    return res.status(500).json(
+      formatGETError(err.message || "Internal Server Error")
+    )
+  }
+
+  if (req.method == "POST") {
+    return res.status(500).json(
+      formatPOSTError(err.message || "Internal Server Error")
+    )
+  }
+})
+</code></pre>
+
     </section>
 
-    <section class="section">
+    <section class="section" id="routes">
 
         <h2>Routes</h2>
 
         <p>
             The server uses the <code>messageRouter</code> for all routes prefixed with <code>/message</code>.
-            Any route other than <code>/message</code> will returned as a 404 error.
+            Any unsupported route results in a 404 response.
         </p>
 
         <h3>Implementation</h3>
@@ -110,22 +207,21 @@ const messageRouter = require('./src/routes/message')
 app.use('/message', messageRouter)
 
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: `Route '${req.originalUrl}' not found`,
+  res.status(404).json(formatErrorMessage(`Route '${req.originalUrl}' not found`, {
     suggestion: "Try '/message'"
-  })
+  }))
 })
 </code></pre>
 
     </section>
 
-    <section class="section">
+    <section class="section" id="startup">
 
         <h2>Server Startup</h2>
 
         <p>
-            The Express server is started using the specified host and port.
+            The Express server is started using the specified host and port when the file
+            is executed directly.
         </p>
 
         <h3>Implementation</h3>
@@ -138,7 +234,36 @@ app.listen(SERVER_PORT, SERVER_HOST, () =>
 
     </section>
 
+    <section class="section" id="testing">
+
+        <h2>Testing</h2>
+
+        <p>
+            The Express <code>app</code> is exported so it can be used in automated tests without
+            starting an actual server. This allows frameworks like Jest or Supertest to interact
+            directly with the application.
+        </p>
+
+        <p>
+            Additionally, the database connection is only initialized when the application is run
+            directly (<code>require.main === module</code>). This ensures that tests do not
+            unintentionally connect to MongoDB, enabling isolation and easier mocking of data
+            access layers.
+        </p>
+
+        <p>
+            When imported in tests, only the configured Express app is used, and no network
+            listener or database connection is automatically started.
+        </p>
+
+<pre><code>
+module.exports = app
+</code></pre>
+
+    </section>
+
 </div>
-    <script src="js/sidebar.js"></script>
+
+<script src="js/sidebar.js"></script>
 </body>
 </html>

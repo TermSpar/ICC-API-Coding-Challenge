@@ -5,7 +5,7 @@
  */
 
 // Mock token helpers
-jest.mock('../src/helpers/tokenHelpers', () => ({
+jest.mock('../src/services/tokenHelpers', () => ({
   hashToken: jest.fn((t) => `hashed-${t}`),
   createToken: jest.fn(),
   validateToken: jest.fn()
@@ -53,21 +53,15 @@ jest.mock('../src/models/tokenModel', () => {
 
 // Imports after mocks
 const request = require('supertest')
-const express = require('express')
-const router = require('../src/routes/message')
 
-const { hashToken, createToken, validateToken } = require('../src/helpers/tokenHelpers')
+const { hashToken, createToken, validateToken } = require('../src/services/tokenHelpers')
 const Message = require('../src/models/messageModel')
-const Token = require('../src/models/tokenModel')
 
 // Extract mocks
 const { saveMessageMock, findOneMessageMock } = Message.__mocks__
-const { saveTokenMock, findOneTokenMock } = Token.__mocks__
 
 // Setup a test express.js app
-const app = express()
-app.use(express.json())
-app.use('/message', router)
+const app = require('../server')
 
 /** 
 * Message API tests
@@ -131,7 +125,7 @@ describe('Message API', () => {
       expect(res.body.token).toBeNull()
     })
 
-    it('should return error status 400 if token save fails', async () => {
+    it('should return error status 500 if token save fails', async () => {
       // Mock successful token creation, but failed message save
       createToken.mockResolvedValue('bens-token')
       saveMessageMock.mockRejectedValue(new Error('Token save failed'))
@@ -144,8 +138,8 @@ describe('Message API', () => {
           message: 'This is Ben\'s test message... hi!'
         })
 
-      // Ensure the correct 400 error status is returned
-      expect(res.status).toBe(400)
+      // Ensure the correct 500 error status is returned
+      expect(res.status).toBe(500)
       // Ensure the success and token fields are there, but null
       expect(res.body.success).toBe(false)
       expect(res.body.token).toBeNull()

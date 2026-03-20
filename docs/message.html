@@ -138,16 +138,15 @@ Content-Type: application/json
             <details>
                 <summary>Click to expand</summary>
 
-                <pre><code>let token 
-try {
-    token = await createToken()
-} catch (err) {
-    return res.status(400).json({ 
-        success: false,
-        error: err.message,
-        token: null
-    })
-}</code></pre>
+                <p>
+                    This route is wrapped with an <code>asyncHandler</code> utility, which automatically
+                    forwards any errors to the global error handling middleware. This removes the need
+                    for manual try/catch blocks inside the route.
+                </p>
+
+                <pre><code>
+const token = await createToken()
+                </code></pre>
 
                 <p>
                     Calls the (async) <code>createToken()</code> function from
@@ -157,8 +156,8 @@ try {
                 </p>
 
                 <p>
-                    Wrapped in a try-catch statement. If <code>createToken()</code>
-                    fails, its error will be caught and returned with a status 500 error.
+                    The token is generated at runtime and returned to the client,
+                    while only its hashed version is stored in the database.
                 </p>
 
                 <pre><code>
@@ -183,20 +182,12 @@ const message = new Message({
                 </p>
 
                 <pre><code>
-try {
-    await message.save()
-    res.status(201).json({
-        success: true,
-        error: null,
-        token
-    })
-} catch (err) {
-    res.status(400).json({ 
-        success: false,
-        error: err.message,
-        token: null
-    })
-}
+await message.save()
+res.status(201).json({
+    success: true,
+    error: null,
+    token
+})
                 </code></pre>
 
                 <p>
@@ -226,6 +217,10 @@ try {
                 <p>
                     This simply blocks any unsupported HTTP methods and returns an
                     error status 405 to indicate an invalid method.
+                </p>
+
+                <p>
+                    This response is formatted using a dedicated helper (<code>formatPOSTError</code>).
                 </p>
 
             </details>
@@ -291,6 +286,12 @@ GET http://localhost:3000/message/bens-random-token
             <details>
                 <summary>Click to expand</summary>
 
+                <p>
+                    This route is wrapped with an <code>asyncHandler</code> utility, which automatically
+                    forwards any errors to the global error handling middleware. This removes the need
+                    for manual try/catch blocks inside the route.
+                </p>
+
                 <pre><code>const providedToken = req.params.token</code></pre>
                 <p>
                     Extracts the token the user provided in the URL.
@@ -298,9 +299,6 @@ GET http://localhost:3000/message/bens-random-token
 
                 <pre><code>
 const validToken = await validateToken(providedToken)
-if (!validToken.success){
-    res.status(400).json(validToken)
-}
                 </code></pre>
                 <p>
                     Calls the (async) <code>validateToken()</code> function from
@@ -309,46 +307,31 @@ if (!validToken.success){
                     <code>validToken.token</code> if it exists.
                 </p>
                 <p>
-                    If the token does not exist, <code>validToken.success</code> will return
-                    false along with an appropriate error message. The status will be a
+                    If the token does not exist, validation will fail and an error
+                    will be passed to the global error handler. The status will be a
                     400 error to inform the user that the issue is on their end.
                 </p>
 
                 <pre><code>
-try {
-    message = await Message.findOne({ token: validToken.token.token })
-} catch (err) {
-    return res.status(500).json({ 
-        success: false,
-        error: err.message,
-        name: null,
-        email: null,
-        message: null 
-    })
-}
+const message = await Message.findOne({ token: validToken.token.token })
                 </code></pre>
                 <p>
                     Since <code>findOne()</code> is an async function that could
-                    hypothetically fail, it is wrapped in a try-catch statement.
+                    hypothetically fail, it is executed within the async handler flow.
                 </p>
+
                 <p>
-                    Any <code>error</code> will be returned to the user along with a
-                    false <code>success</code> flag and null values for
-                    <code>name</code>, <code>email</code>, and <code>message</code>.
+                    If an error occurs, it will be handled by the global error handler
+                    and formatted using the appropriate response helper.
                 </p>
+
                 <p>
-                    <strong>Note:</strong> we must <code>return</code> this error otherwise the program
-                    would continue with a null <code>message</code>.
+                    <strong>Note:</strong> execution will not continue if validation fails,
+                    because an error will be thrown before reaching this point.
                 </p>
 
                 <pre><code>
-res.status(201).json({
-    success: true,
-    error: null,
-    name: message.name,
-    email: message.email,
-    message: message.message
-})
+res.status(200).json(formatSuccessMessage(message))
                 </code></pre>
                 <p>
                     If the token and its message have both been found, then the
@@ -372,6 +355,11 @@ res.status(201).json({
                     This simply blocks any unsupported HTTP methods and returns an
                     error status 405 to indicate an invalid method.
                 </p>
+
+                <p>
+                    This response is formatted using a dedicated helper (<code>formatGETError</code>).
+                </p>
+
             </details>
 
         </section>

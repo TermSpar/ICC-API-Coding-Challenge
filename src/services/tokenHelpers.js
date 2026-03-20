@@ -1,6 +1,7 @@
 const Token = require('../models/tokenModel')
 const crypto = require('crypto')
 const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000 // 24 hours
+const HttpError = require('../helpers/HttpError')
 
 /**
  * Generates a cryptographically secure random token (i.e. it is 
@@ -13,27 +14,6 @@ const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000 // 24 hours
  */
 function generateToken() {
     return crypto.randomBytes(32).toString('hex') 
-}
-
-/**
- * Generates a standardized error response for token validation.
- *
- * The response must always contain name, email, and message fields
- * so they are explicitly set to null when an error occurs. The error
- * field is also set to whatever message is specified.
- *
- * @function tokenError
- * @param {string} message - Error message describing the failure.
- * @returns {Object} - Structured error response.
- */
-function tokenError(errorMessage) {
-    return {
-        success: false,
-        error: errorMessage,
-        name: null,
-        email: null,
-        message: null
-    }
 }
 
 /**
@@ -112,28 +92,28 @@ async function validateToken(providedToken) {
     try {
         actualToken = await Token.findOne({ token: hashedToken })
     } catch (err) {
-        return tokenError(err.message)
+        throw new HttpError(500, err.message)
     }
 
     // if the token doesn't exist
     if (!actualToken)
-        return tokenError("This link could not be found.")
+        throw new HttpError(400, "This link could not be found.")
 
     // if the token has expired (after 24 hours)
     const ageInMs = Date.now() - actualToken.createdAt
     if (ageInMs > TOKEN_EXPIRATION_MS) 
-        return tokenError("This link has expired.")
+        throw new HttpError(400, "This link has expired.")
 
     // if the token has already been used
     if (actualToken.used)
-        return tokenError("This link has already been used.")
+        throw new HttpError(400, "This link has already been used.")
 
     // if none of the errors obtain, mark token as used
     actualToken.used = true
     try {
         await actualToken.save()
     } catch (err) {
-        return tokenError(err.message)
+        throw new HttpError(500, err.message)
     }
 
     return { 

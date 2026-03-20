@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Helpers Documentation</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div id="sidebar-placeholder"></div>
+
+<div class="main">
+
+    <h1>Helpers</h1>
+
+    <section class="section">
+
+        <p>
+            This page documents the reusable helper utilities used across the application, including
+            async error handling, standardized response formatting, and custom error classes.
+        </p>
+
+    </section>
+
+    <!-- Table of Contents -->
+    <section class="section">
+
+        <h2>Table of Contents</h2>
+
+        <table>
+            <tr>
+                <th>Section</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><a href="#async-handler">Async Handler</a></td>
+                <td>Wrapper for async route handlers to forward errors automatically.</td>
+            </tr>
+            <tr>
+                <td><a href="#response-formatting">Response Formatting</a></td>
+                <td>Standardized success and error response structures.</td>
+            </tr>
+            <tr>
+                <td><a href="#http-error">HttpError</a></td>
+                <td>Custom error class for HTTP-specific errors.</td>
+            </tr>
+        </table>
+
+    </section>
+
+    <section class="section" id="async-handler">
+
+        <h2>Async Handler</h2>
+
+        <p>
+            Wraps an async Express route handler and automatically forwards any errors to the global error handling middleware.
+        </p>
+
+        <p>
+            This eliminates the need for repetitive try-catch blocks inside each route handler by catching rejected promises
+            and passing them to <code>next()</code>.
+        </p>
+
+        <h3>Implementation</h3>
+
+<pre><code>
+function asyncHandler(fn) {
+  return function (req, res, next) {
+    Promise.resolve(fn(req, res, next)).catch(next)
+  }
+}
+</code></pre>
+
+        <p>
+            Example usage:
+        </p>
+
+<pre><code>
+router.get('/', asyncHandler(async (req, res) => {
+  const data = await someAsyncOperation()
+  res.json(data)
+}))
+</code></pre>
+
+    </section>
+
+    <section class="section" id="response-formatting">
+
+        <h2>Response Formatting</h2>
+
+        <p>
+            These helper functions ensure that all API responses follow a consistent structure.
+            GET and POST requests use different formats to match the requirements of each endpoint.
+        </p>
+
+        <h3>GET Error Response</h3>
+
+        <p>
+            Generates a standardized error response for a GET request. The response always includes
+            <code>name</code>, <code>email</code>, and <code>message</code> fields set to null when an error occurs.
+        </p>
+
+<pre><code>
+function formatGETError(message, extra = {}) {
+  return {
+    success: false,
+    error: message,
+    name: null,
+    email: null,
+    message: null,
+    ...extra
+  }
+}
+</code></pre>
+
+        <h3>POST Error Response</h3>
+
+        <p>
+            Generates a standardized error response for a POST request. The response always includes
+            <code>success</code>, <code>error</code>, and <code>token</code> fields.
+        </p>
+
+<pre><code>
+function formatPOSTError(message, extra = {}) {
+  return {
+    success: false,
+    error: message,
+    token: null,
+    ...extra
+  }
+}
+</code></pre>
+
+        <h3>Success Response</h3>
+
+        <p>
+            Generates a standardized success response for retrieving a message. The response includes
+            the message's <code>name</code>, <code>email</code>, and <code>message</code> fields.
+        </p>
+
+<pre><code>
+function formatSuccessMessage(messageDoc) {
+  return {
+    success: true,
+    error: null,
+    name: messageDoc.name,
+    email: messageDoc.email,
+    message: messageDoc.message
+  }
+}
+</code></pre>
+
+    </section>
+
+    <section class="section" id="http-error">
+
+        <h2>HttpError</h2>
+
+        <p>
+            Custom error class for representing HTTP-specific errors.
+        </p>
+
+        <p>
+            Extends the native JavaScript <code>Error</code> class by including an HTTP status code,
+            allowing centralized error handling middleware to determine the appropriate response status.
+        </p>
+
+        <h3>Implementation</h3>
+
+<pre><code>
+class HttpError extends Error {
+  constructor(statusCode, message) {
+    super(message)
+    this.statusCode = statusCode
+  }
+}
+</code></pre>
+
+        <p>
+            Example usage:
+        </p>
+
+<pre><code>
+throw new HttpError(404, "Resource not found")
+</code></pre>
+
+    </section>
+
+</div>
+
+<script src="js/sidebar.js"></script>
+</body>
+</html>

@@ -1,8 +1,14 @@
 const express = require('express')
 const router = express.Router()
-const { hashToken, createToken, validateToken } = require('../helpers/tokenHelpers')
+const { hashToken, createToken, validateToken } = require('../services/tokenHelpers')
 const Message = require('../models/messageModel')
-const Token = require('../models/tokenModel')
+const asyncHandler = require('../helpers/asyncHandler')
+const HttpError = require('../helpers/HttpError')
+const { formatGETError, formatPOSTError, formatSuccessMessage } = require('../helpers/responseHelpers')
+
+function isValidTokenFormat(token) {
+  return /^[a-f0-9]{64}$/.test(token)
+}
 
 /**
  * GET /:token
@@ -22,50 +28,27 @@ const Token = require('../models/tokenModel')
  * @returns {Object} Message data if token is valid
  */
 router.route('/:token')
-    .get(async (req, res) => {
+    // Note: asyncHandler will take care of 500 errors 
+    // (i.e. no need for a try-catch)
+    .get(asyncHandler(async (req, res) => {
         const providedToken = req.params.token
 
-        // validate the token (this handles the errors)
+        // validateToken() handles validation (i.e. 400) errors
         const validToken = await validateToken(providedToken)
-        if (!validToken.success){
-            // status code 400 to indicate a user error
-            return res.status(400).json(validToken)
-        }
 
-        // we'll only get here if the token exists
+        // We will only get here if the token exists
         // validToken.token retrieves the token object, the additional
         // .token retrieves the actual token ID
-        try {
-            message = await Message.findOne({ token: validToken.token.token })
-        } catch (err) {
-            // status code 500 to indicate a server side error
-            res.status(500).json({ 
-                success: false,
-                error: err.message,
-                name: null,
-                email: null,
-                message: null 
-            })
-        }
-
-        // status code 200 to indicate a successful retrieval
-        res.status(200).json({
-            success: true,
-            error: null,
-            name: message.name,
-            email: message.email,
-            message: message.message
+        const message = await Message.findOne({ 
+            token: validToken.token.token 
         })
-    })
+
+        // Status code 200 to indicate a successful retrieval
+        res.status(200).json(formatSuccessMessage(message))
+    }))
     .all((req, res) => {
       // Block any unsupported HTTP methods
-      res.status(405).json({
-          success: false,
-          error: `${req.method} not allowed on this link`,
-          name: null,
-          email: null,
-          message: null
-      })
+      return res.status(405).json(formatGETError(`${req.method} not allowed on this link`))
     })
 
 /**
@@ -91,18 +74,10 @@ router.route('/:token')
  * was a success.
  */
 router.route('/')
-    .post(async (req, res) => {
-        let token 
-        try {
-            token = await createToken()
-        } catch (err) {
-            // status code 500 to indicate a server side error
-            return res.status(500).json({ 
-                success: false,
-                error: err.message,
-                token: null
-            })
-        }
+    // Note: asyncHandler will take care of 500 errors 
+    // (i.e. no need for a try-catch)
+    .post(asyncHandler(async (req, res) => { 
+        const token = await createToken()
 
         const message = new Message({
             name: req.body.name,
@@ -111,33 +86,17 @@ router.route('/')
             token: hashToken(token)
         })
 
-        // wrap in a try-catch because the .save() method is async
-        try {
-            await message.save()
-            // status 201 to indicate the successful creation of a message
-            res.status(201).json({
-                success: true,
-                error: null,
-                token
-            })
-        } catch (err) {
-            // 400 error to indicate bad user input
-            res.status(400).json({ 
-                success: false,
-                error: err.message,
-                token: null
-            })
-        }
-    })
+        await message.save()
+        // status 201 to indicate the successful creation of a message
+        res.status(201).json({
+            success: true,
+            error: null,
+            token
+        })
+    }))
     .all((req, res) => {
       // Block any unsupported HTTP methods
-      res.status(405).json({
-          success: false,
-          error: `${req.method} not allowed on this link`,
-          name: null,
-          email: null,
-          message: null
-      })
+      return res.status(405).json(formatPOSTError(`${req.method} not allowed on this link`))
     })
 
 module.exports = router
