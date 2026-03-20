@@ -199,6 +199,17 @@ app.use((err, req, res, next) => {
         since their error formats must be different. Additionally, validation errors
         will only ever be raised on GET requests.
     </p>
+
+    <h3>Invalid Route Handling (404 Errors)</h3>
+
+    <pre><code>
+app.use((req, res) => {
+  if (req.method == 'GET'){
+    return res.status(404).json(formatGETError(`Route '${req.originalUrl}' not found`))
+  }
+  return res.status(404).json(formatPOSTError(`Route '${req.originalUrl}' not found`))
+})
+</code></pre>
     </section>
 
     <section class="section" id="routes">
