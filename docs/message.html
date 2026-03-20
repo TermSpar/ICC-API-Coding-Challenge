@@ -39,159 +39,16 @@
                     <th>Description</th>
                 </tr>
                 <tr>
-                    <td><a href="#GET">GET</a></td>
-                    <td>/message/:token</td>
-                    <td>Retrieves a stored message using a one-time token.</td>
-                </tr>
-                <tr>
                     <td><a href="#POST">POST</a></td>
                     <td>/message/</td>
                     <td>Creates a new message and generates a retrieval token.</td>
                 </tr>
-            </table>
-
-        </section>
-
-        <section class="section" id="GET">
-
-            <h2>GET /message/:token</h2>
-
-            <p>Retrieves a message using a one-time token.</p>
-
-            <h3>Path Parameters</h3>
-
-            <table>
                 <tr>
-                    <th>Parameter</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                </tr>
-                <tr>
-                    <td>token</td>
-                    <td>string</td>
-                    <td>The one-time token used to retrieve a stored message.</td>
+                    <td><a href="#GET">GET</a></td>
+                    <td>/message/:token</td>
+                    <td>Retrieves a stored message using a one-time token.</td>
                 </tr>
             </table>
-
-            <h3>Example Request</h3>
-            <pre><code>
-GET http://localhost:3000/message/eae18dc7e99990845817023567d7cdf03e50fbabb28c5c1432f50cbaf84feedf
-            </code></pre>
-
-            <h3>Example Response</h3>
-            <pre><code>{
-    "success": true,
-    "error": null,
-    "name": "Ben",
-    "email": "Ben@test.com",
-    "message": "This is Ben's link... hi!"
-}
-            </code></pre>
-
-            <h3>Status Codes</h3>
-            <ul>
-                <li><code>200</code> – Message retrieved successfully.</li>
-                <li><code>400</code> – Invalid or expired token.</li>
-                <li><code>405</code> – Unsupported HTTP method.</li>
-                <li><code>500</code> – Server error while retrieving the message.</li>
-            </ul>
-
-            <nav class="toc">
-                <h3>Implementation Summary</h3>
-                <ol>
-                    <li>Extracts the token provided by the user in the URL.</li>
-                    <li>Validates the token to ensure its usability.</li>
-                    <li>If the token is invalid, an appropriate error will return.</li>
-                    <li>If the token is valid, the desired name, email, and message information will be returned.</li>
-                </ol>
-            </nav>
-
-            <h3>Implementation Details</h3>
-            <details>
-                <summary>Click to expand</summary>
-
-                <pre><code>const providedToken = req.params.token</code></pre>
-                <p>
-                    Extracts the token the user provided in the URL.
-                </p>
-
-                <pre><code>
-const validToken = await validateToken(providedToken)
-if (!validToken.success){
-    res.status(400).json(validToken)
-}
-                </code></pre>
-                <p>
-                    Calls the (async) <code>validateToken()</code> function from
-                    <a href="../api/token-helpers.html">tokenHelpers.js</a>,
-                    which will make the token accessible as
-                    <code>validToken.token</code> if it exists.
-                </p>
-                <p>
-                    If the token does not exist, <code>validToken.success</code> will return
-                    false along with an appropriate error message. The status will be a
-                    400 error to inform the user that the issue is on their end.
-                </p>
-
-                <pre><code>
-try {
-    message = await Message.findOne({ token: validToken.token.token })
-} catch (err) {
-    return res.status(500).json({ 
-        success: false,
-        error: err.message,
-        name: null,
-        email: null,
-        message: null 
-    })
-}
-                </code></pre>
-                <p>
-                    Since <code>findOne()</code> is an async function that could
-                    hypothetically fail, it is wrapped in a try-catch statement.
-                </p>
-                <p>
-                    Any <code>error</code> will be returned to the user along with a
-                    false <code>success</code> flag and null values for
-                    <code>name</code>, <code>email</code>, and <code>message</code>.
-                </p>
-                <p>
-                    <strong>Note:</strong> we must <code>return</code> this error otherwise the program
-                    would continue with a null <code>message</code>.
-                </p>
-
-                <pre><code>
-res.status(201).json({
-    success: true,
-    error: null,
-    name: message.name,
-    email: message.email,
-    message: message.message
-})
-                </code></pre>
-                <p>
-                    If the token and its message have both been found, then the
-                    <code>Message</code> Mongoose document can be retrieved. This
-                    <code>message</code> will have its name, email, and message
-                    returned along with a true success flag and a false error flag.
-                </p>
-
-                <pre><code>
-.all((req, res) => {
-      res.status(405).json({
-          success: false,
-          error: `${req.method} not allowed on this link`,
-          name: null,
-          email: null,
-          message: null
-      })
-    })
-                </code></pre>
-                <p>
-                    This simply blocks any unsupported HTTP methods and returns an
-                    error status 405 to indicate an invalid method.
-                </p>
-            </details>
 
         </section>
 
@@ -254,7 +111,7 @@ Content-Type: application/json
             <pre><code>{
     "success": true,
     "error": null,
-    "token": "3845b90652c3e50552404b647319d4fac2e8997cef8453a87e2a2b2e36e719af"
+    "token": "bens-random-token"
 }
             </code></pre>
 
@@ -371,6 +228,150 @@ try {
                     error status 405 to indicate an invalid method.
                 </p>
 
+            </details>
+
+        </section>
+
+        <section class="section" id="GET">
+
+            <h2>GET /message/:token</h2>
+
+            <p>Retrieves a <code>Message</code> using a one-time token.</p>
+
+            <h3>Path Parameters</h3>
+
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>token</td>
+                    <td>string</td>
+                    <td>The one-time token used to retrieve a stored message.</td>
+                </tr>
+            </table>
+
+            <h3>Example Request</h3>
+            <pre><code>
+GET http://localhost:3000/message/bens-random-token
+            </code></pre>
+
+            <h3>Example Response</h3>
+            <pre><code>{
+    "success": true,
+    "error": null,
+    "name": "Ben",
+    "email": "Ben@test.com",
+    "message": "This is Ben's link... hi!"
+}
+            </code></pre>
+
+            <h3>Status Codes</h3>
+            <ul>
+                <li><code>200</code> – Message retrieved successfully.</li>
+                <li><code>400</code> – Invalid or expired token.</li>
+                <li><code>405</code> – Unsupported HTTP method.</li>
+                <li><code>500</code> – Server error while retrieving the message.</li>
+            </ul>
+
+            <nav class="toc">
+                <h3>Implementation Summary</h3>
+                <ol>
+                    <li>Extracts the token provided by the user in the URL.</li>
+                    <li>Validates the token to ensure its usability.</li>
+                    <li>If the token is invalid, an appropriate error will return.</li>
+                    <li>If the token is valid, the desired <code>name</code>, 
+                    <code>email</code>, and <code>message</code> information will be returned.</li>
+                </ol>
+            </nav>
+
+            <h3>Implementation Details</h3>
+            <details>
+                <summary>Click to expand</summary>
+
+                <pre><code>const providedToken = req.params.token</code></pre>
+                <p>
+                    Extracts the token the user provided in the URL.
+                </p>
+
+                <pre><code>
+const validToken = await validateToken(providedToken)
+if (!validToken.success){
+    res.status(400).json(validToken)
+}
+                </code></pre>
+                <p>
+                    Calls the (async) <code>validateToken()</code> function from
+                    <a href="../api/token-helpers.html">tokenHelpers.js</a>,
+                    which will make the token accessible as
+                    <code>validToken.token</code> if it exists.
+                </p>
+                <p>
+                    If the token does not exist, <code>validToken.success</code> will return
+                    false along with an appropriate error message. The status will be a
+                    400 error to inform the user that the issue is on their end.
+                </p>
+
+                <pre><code>
+try {
+    message = await Message.findOne({ token: validToken.token.token })
+} catch (err) {
+    return res.status(500).json({ 
+        success: false,
+        error: err.message,
+        name: null,
+        email: null,
+        message: null 
+    })
+}
+                </code></pre>
+                <p>
+                    Since <code>findOne()</code> is an async function that could
+                    hypothetically fail, it is wrapped in a try-catch statement.
+                </p>
+                <p>
+                    Any <code>error</code> will be returned to the user along with a
+                    false <code>success</code> flag and null values for
+                    <code>name</code>, <code>email</code>, and <code>message</code>.
+                </p>
+                <p>
+                    <strong>Note:</strong> we must <code>return</code> this error otherwise the program
+                    would continue with a null <code>message</code>.
+                </p>
+
+                <pre><code>
+res.status(201).json({
+    success: true,
+    error: null,
+    name: message.name,
+    email: message.email,
+    message: message.message
+})
+                </code></pre>
+                <p>
+                    If the token and its message have both been found, then the
+                    <code>Message</code> Mongoose document can be retrieved. This
+                    <code>message</code> will have its name, email, and message
+                    returned along with a true success flag and a false error flag.
+                </p>
+
+                <pre><code>
+.all((req, res) => {
+      res.status(405).json({
+          success: false,
+          error: `${req.method} not allowed on this link`,
+          name: null,
+          email: null,
+          message: null
+      })
+    })
+                </code></pre>
+                <p>
+                    This simply blocks any unsupported HTTP methods and returns an
+                    error status 405 to indicate an invalid method.
+                </p>
             </details>
 
         </section>

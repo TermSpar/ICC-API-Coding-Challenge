@@ -149,12 +149,13 @@ describe('Token Helpers', () => {
 
       const res = await validateToken('bens-valid-token')
 
+      // Ensure its success
       expect(res.success).toBe(true)
       expect(tokenObj.used).toBe(true)
       expect(save).toHaveBeenCalled()
     })
 
-    it('should return an error message if saving used token fails', async () => {
+    it('should return an error message if saving the used token fails', async () => {
       const tokenObj = {
         createdAt: Date.now(),
         used: false,

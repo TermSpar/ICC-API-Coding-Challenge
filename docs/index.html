@@ -23,15 +23,11 @@
 
         <section class="section">
             <p>
-                This documentation describes a simple API that has two endpoints.
-                One allows the user to create a message that has a name, email, and
-                unique token attached. The other allows the user to use the unique
-                token to access the originally attached message, name, and email.
-            </p>
-
-            <p>
-                When a message is created, a unique token is generated. Tokens automatically
-                expire after 24-hours or after they have been used.
+                This documentation describes an API with two endpoints. The first endpoint (POST) 
+                asks for user-provided information that then gets attached to a randomly 
+                generated one-time use token. This token can then be used by the second endpoint 
+                (GET) to access the information that was provided to the first endpoint. Tokens 
+                can only be used once, and they will automatically expire after 24-hours.
             </p>
         </section>
 
