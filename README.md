@@ -14,7 +14,7 @@ ICC API Coding Challenge
 │   ├── models.html           # Database models docs
 │   ├── server.html           # Server setup docs
 │   ├── helpers.html          # Helper utilities docs
-│   └── token-services.html    # Token helper/services docs
+│   └── token-services.html   # Token helper/services docs
 │
 ├── node_modules/             # Installed npm dependencies (not included in repo)
 │
