@@ -100,6 +100,8 @@ router.get('/', asyncHandler(async (req, res) => {
         <p>
             Generates a standardized error response for a GET request. The response always includes
             <code>name</code>, <code>email</code>, and <code>message</code> fields set to null when an error occurs.
+            The <code>extra</code> field is for future development (e.g. if a <code>suggested</code> field
+            were to be added for 404 errors)
         </p>
 
 <pre><code>
@@ -121,6 +123,8 @@ function formatGETError(message, extra = {}) {
             Generates a standardized error response for a POST request. The response always includes
             <code>success</code>, <code>error</code>, and <code>token</code> fields. The <code>error</code> 
             field is null if there are no errors, and <code>token</code> is null if there are errors.
+            The <code>extra</code> field is for future development (e.g. if a <code>suggested</code> field
+            were to be added for 404 errors)
         </p>
 
 <pre><code>
