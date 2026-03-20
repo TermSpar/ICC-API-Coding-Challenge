@@ -1,6 +1,5 @@
 # ICC-API-Coding-Challenge
-This is an API with two endpoints. The first endpoint asks for user-provided information that then gets attached to a randomly generated one-time use token. This token can then be used by the second endpoint to access the information that was provided to the first endpoint. Tokens can only be used once, and they will automatically expire after 24-hours.
-
+This is an API with two endpoints. Endpoint #1 (POST) asks for user-provided information that then gets attached to a randomly generated one-time use token. This token can then be used by endpoint #2 (GET) to access the information that was provided to endpoint #1. Tokens can only be used once, and they will automatically expire after 24-hours.
 # Project Structure
 ```
 ICC API Coding Challenge
