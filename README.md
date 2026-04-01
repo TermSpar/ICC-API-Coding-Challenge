@@ -136,7 +136,7 @@ Response (400 Bad Request)
     "message": null
 }
 ```
-For all of the possible error status codes, see the [Message API documentation](https://termspar.github.io/ICC-API-Coding-Challenge/message.html).
+For all of the possible error status codes, see the [Message API documentation](https://termspar.github.io/Message-API/message.html).
 # Testing
 This application uses **Jest** for unit testing.  
 
@@ -147,7 +147,7 @@ npm test
 # Documentation
 Full documentation is available on **Github Pages**:
 
-https://termspar.github.io/ICC-API-Coding-Challenge/index.html
+https://termspar.github.io/Message-API/index.html
 
 It can also be viewed locally by opening the following in your browser:
 ```
